@@ -9,7 +9,6 @@ color 2
 set "soreal=%~dp0soreal.txt"
 if exist "%soreal%" (
     type "%soreal%"
-    goto :eof
 )
 echo [INFO] soreal.txt not found locally -- attempting download...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/soreal.txt' -OutFile '%soreal%' -UseBasicParsing; exit 0 } catch { exit 1 }"
