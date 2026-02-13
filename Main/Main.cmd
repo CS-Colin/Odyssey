@@ -24,8 +24,6 @@ if exist "%soreal%" (
     echo [WARN] Could not download soreal.txt; continuing without header.
 )
 
-goto :eof
-
 :: Check for Administrator Privileges
 >nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
 if %errorlevel% NEQ 0 (
