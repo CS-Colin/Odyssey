@@ -1,12 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
 title Odyssey V1 PRE ALPHA - 2025 Edition
-call :ShowSoreal
-echo.
-color 2
-:: Subroutine: ShowSoreal - display local soreal.txt or download from GitHub if missing
-:ShowSoreal
-set "soreal=%~dp0soreal.txt"
 
 if exist "%soreal%" (
     type "%soreal%"
@@ -23,6 +17,15 @@ if exist "%soreal%" (
 ) else (
     echo [WARN] Could not download soreal.txt; continuing without header.
 )
+
+call :ShowSoreal
+echo.
+color 2
+:: Subroutine: ShowSoreal - display local soreal.txt or download from GitHub if missing
+:ShowSoreal
+set "soreal=%~dp0soreal.txt"
+
+
 
 :: Check for Administrator Privileges
 >nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
