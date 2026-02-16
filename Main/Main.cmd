@@ -1,31 +1,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 title Odyssey V1 PRE ALPHA - 2025 Edition
-
-if exist "%soreal%" (
-    type "%soreal%"
-    goto :eof
-)
-
-echo [INFO] soreal.txt not found locally -- attempting download...
-
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-"try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/soreal.txt' -OutFile '%soreal%' -UseBasicParsing; exit 0 } catch { exit 1 }"
-
-if exist "%soreal%" (
-    type "%soreal%"
-) else (
-    echo [WARN] Could not download soreal.txt; continuing without header.
-)
-
-call :ShowSoreal
 echo.
 color 2
-:: Subroutine: ShowSoreal - display local soreal.txt or download from GitHub if missing
-:ShowSoreal
-set "soreal=%~dp0soreal.txt"
-
-
 
 :: Check for Administrator Privileges
 >nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
@@ -37,7 +14,6 @@ if %errorlevel% NEQ 0 (
 
 :MENU
 cls
-call :ShowSoreal
 echo ============================
 echo   Windows Setup Main Menu
 echo ============================
@@ -59,7 +35,6 @@ goto MENU
 
 :HOTFIXES_MENU
 cls
-call :ShowSoreal
 echo ============================
 echo   Windows Hot Fixes Menu
 echo ============================
@@ -83,7 +58,6 @@ goto HOTFIXES_MENU
 
 :ADMIN_MENU
 cls
-call :ShowSoreal
 echo ============================
 echo   Windows Administration Menu
 echo ============================
@@ -126,7 +100,6 @@ goto ADMIN_MENU
 
 :UTILS_MENU
 cls
-call :ShowSoreal
 echo ============================
 echo   Windows Utilities Menu
 echo ============================
