@@ -582,11 +582,11 @@ timeout /t 5 /nobreak >nul
 :: Enforce File Type Associations with SetUserFTA
 ::=================================================
 echo [INFO] Enforcing file type associations with SetUserFTA...
-:: Ensure SetUserFTA.exe exists in script folder; download from GitHub raw if missing
-if not exist "%~dp0SetUserFTA.exe" (
+:: Ensure SetUserFTA.exe exists in C:\_install; download from GitHub raw if missing
+if not exist "C:\_install\SetUserFTA.exe" (
     echo [INFO] SetUserFTA.exe not found locally -- attempting download...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/SetUserFTA.exe' -OutFile '%~dp0SetUserFTA.exe' -UseBasicParsing; exit 0 } catch { exit 1 }"
-    if not exist "%~dp0SetUserFTA.exe" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/SetUserFTA.exe' -OutFile 'C:\_install\SetUserFTA.exe' -UseBasicParsing; exit 0 } catch { exit 1 }"
+    if not exist "C:\_install\SetUserFTA.exe" (
         echo [WARN] Could not download SetUserFTA.exe; SetUserFTA steps may fail.
     ) else (
         echo [OK] SetUserFTA.exe downloaded.
@@ -594,20 +594,20 @@ if not exist "%~dp0SetUserFTA.exe" (
 )
 
 :: Adobe Acrobat
-powershell -NoProfile -Command ".\SetUserFTA.exe .pdf AcroExch.Document.DC"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .pdf AcroExch.Document.DC"
 
 :: Outlook
-powershell -NoProfile -Command ".\SetUserFTA.exe .msg Outlook.File.msg"
-powershell -NoProfile -Command ".\SetUserFTA.exe mailto Outlook.URL.mailto.15"
-powershell -NoProfile -Command ".\SetUserFTA.exe .eml Outlook.File.eml"
-powershell -NoProfile -Command ".\SetUserFTA.exe .emlx Outlook.File.emlx"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .msg Outlook.File.msg"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe mailto Outlook.URL.mailto.15"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .eml Outlook.File.eml"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .emlx Outlook.File.emlx"
 
 :: Chrome
-powershell -NoProfile -Command ".\SetUserFTA.exe .http Google.Chrome"
-powershell -NoProfile -Command ".\SetUserFTA.exe .https Google.Chrome"
-powershell -NoProfile -Command ".\SetUserFTA.exe .url Google.Chrome"
-powershell -NoProfile -Command ".\SetUserFTA.exe .htm ChromeHTML"
-powershell -NoProfile -Command ".\SetUserFTA.exe .html ChromeHTML"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .http Google.Chrome"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .https Google.Chrome"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .url Google.Chrome"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .htm ChromeHTML"
+powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .html ChromeHTML"
 
 echo [OK] File type associations have been set.
 echo [INFO] You may need to log off/log back in for changes to take effect.
