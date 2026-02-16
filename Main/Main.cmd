@@ -15,7 +15,7 @@ cls
 echo:            ______________________________________________________
 echo:          
 echo:                        ============================
-echo:                             Oddssey Main Menu     
+echo:                             Odyssey Main Menu     
 echo:                        ============================
 echo:        
 echo:                           [1] Start Main Setup  
