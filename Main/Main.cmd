@@ -10,30 +10,21 @@ if %errorlevel% NEQ 0 (
     exit /b
 )
 
-::=================================================
-:: Auto-Center Text Function - Disabled (using simple echo)
-::=================================================
-
 :MENU
 cls
+echo:            ______________________________________________________
+echo:          
+echo:                           [1] Start Main Setup
+echo:                 
+echo:                           [2] Administration Menu
 echo:
+echo:                           [3] Utilities Menu
 echo:
-echo:
-echo:
-echo:
-echo:             ______________________________________________________
-echo:           
-echo:                    [1] Start Main Setup
-echo:                  
-echo:                    [2] Administration Menu
-echo:
-echo:                    [3] Utilities Menu
-echo:
-echo:                    [4] Windows Hot Fixes Menu
-echo:                   ______________________________________________      
-echo:                                                                          
-echo:                    [0] Go to Main Menu
-echo:              ______________________________________________________
+echo:                           [4] Windows Hot Fixes Menu
+echo:                 ______________________________________________      
+echo:                                                                         
+echo:                           [0] Go to Main Menu
+echo:            ______________________________________________________
 echo:
 echo.
 echo Enter your choice [0-4]:
