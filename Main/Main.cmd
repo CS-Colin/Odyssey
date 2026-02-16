@@ -11,43 +11,32 @@ if %errorlevel% NEQ 0 (
 )
 
 ::=================================================
-:: Auto-Center Text Function
+:: Auto-Center Text Function - Disabled (using simple echo)
 ::=================================================
-:CenterText
-setlocal enabledelayedexpansion
-set "text=%~1"
-set "textLength=0"
-for /L %%a in (0,1,200) do (
-    if "!text:~%%a,1!" neq "" (
-        set /a "textLength=%%a"
-    ) else (
-        goto calcCentering
-    )
-)
-:calcCentering
-for /f %%a in ('mode con ^| find "Columns"') do set "consoleWidth=%%a"
-set "consoleWidth=!consoleWidth:*: =!"
-set /a "leftPadding=(!consoleWidth! - !textLength!) / 2"
-if !leftPadding! LSS 0 set "leftPadding=0"
-set "paddedText="
-for /L %%a in (1,1,!leftPadding!) do set "paddedText=!paddedText! "
-echo !paddedText!!text!
-endlocal
-goto :eof
 
 :MENU
 cls
-call :CenterText "============================"
-call :CenterText "Windows Setup Main Menu"
-call :CenterText "============================"
+echo:
+echo:
+echo:
+echo:
+echo:
+echo:             ______________________________________________________
+echo:           
+echo:                    [1] Start Main Setup
+echo:                  
+echo:                    [2] Administration Menu
+echo:
+echo:                    [3] Utilities Menu
+echo:
+echo:                    [4] Windows Hot Fixes Menu
+echo:                   ______________________________________________      
+echo:                                                                          
+echo:                    [0] Go to Main Menu
+echo:              ______________________________________________________
+echo:
 echo.
-call :CenterText "1. Start Main Setup"
-call :CenterText "2. Administration Menu"
-call :CenterText "3. Utils Menu"
-call :CenterText "4. Hot Fixes Menu"
-call :CenterText "0. Exit"
-echo.
-call :CenterText "Enter your choice [0-4]:"
+echo Enter your choice [0-4]:
 set /p choice= 
 
 if "%choice%"=="1" goto STARTMAIN
@@ -60,52 +49,51 @@ goto MENU
 
 :HOTFIXES_MENU
 cls
-call :CenterText "============================"
-call :CenterText "Windows Hot Fixes Menu"
-call :CenterText "============================"
+echo ============================
+echo   Windows Hot Fixes Menu
+echo ============================
+echo 1. Fix BitLocker Encryption Error Code 0x8004100e
+echo 0. Back to Main Menu
 echo.
-call :CenterText "1. Fix BitLocker Encryption Error Code 0x8004100e"
-call :CenterText "0. Back to Main Menu"
-echo.
-call :CenterText "Enter your choice [0-1]:"
+echo Enter your choice [0-1]:
 set /p hotfix_choice=
 
 if "%hotfix_choice%"=="1" goto FIX_BITLOCKER
 if "%hotfix_choice%"=="0" goto MENU
-call :CenterText "[ERROR] Invalid choice. Please try again."
+echo [ERROR] Invalid choice. Please try again.
 pause
 goto HOTFIXES_MENU
 
 :FIX_BITLOCKER
 cls
-call :CenterText "[INFO] Fixing BitLocker Encryption Error Code 0x8004100e..."
+echo [INFO] Fixing BitLocker Encryption Error Code 0x8004100e...
 mofcomp.exe c:\windows\system32\wbem\win32_encryptablevolume.mof
 pause
 goto HOTFIXES_MENU
 
 :ADMIN_MENU
 cls
-call :CenterText "============================"
-call :CenterText "Windows Administration Menu"
-call :CenterText "============================"
+echo "============================"
+echo "Windows Administration Menu"
+echo "============================"
 echo.
-call :CenterText "1.  Disable BitLocker"
-call :CenterText "2.  Create New User"
-call :CenterText "3.  Gamco Registry Setup Fix"
-call :CenterText "4.  Enable BitLocker"
-call :CenterText "5.  Change Computer Name"
-call :CenterText "6.  Set Local Administrator Password"
-call :CenterText "7.  Join Domain / Workgroup"
-call :CenterText "8.  Enable/Disable Remote Desktop"
-call :CenterText "9.  Enable/Disable Windows Firewall"
-call :CenterText "10. Clear Windows Event Logs"
-call :CenterText "11. Manage Windows Services"
-call :CenterText "12. View Windows Update History"
-call :CenterText "13. Enable/Disable UAC"
-call :CenterText "14. Export/Import Local Group Policy"
-call :CenterText "0.  Back to Main Menu"
+echo "1.  Disable BitLocker"
+echo "2.  Create New User"
+echo "3.  Gamco Registry Setup Fix"
+echo "4.  Enable BitLocker"
+echo "5.  Change Computer Name"
+echo "6.  Set Local Administrator Password"
+echo "7.  Join Domain / Workgroup"
+echo "8.  Enable/Disable Remote Desktop"
+echo "9.  Enable/Disable Windows Firewall"
+echo "10. Clear Windows Event Logs"
+echo "11. Manage Windows Services"
+echo "12. View Windows Update History"
+echo "13. Enable/Disable UAC"
+echo "14. Export/Import Local Group Policy"
+echo "0.  Back to Main Menu"
 echo.
-call :CenterText "Enter your choice [0-14]:"
+echo "Enter your choice [0-14]:"
 set /p admin_choice=
 
 if "%admin_choice%"=="1" goto DISABLE_BITLOCKER
@@ -123,34 +111,34 @@ if "%admin_choice%"=="12" goto UPDATE_HISTORY
 if "%admin_choice%"=="13" goto TOGGLE_UAC
 if "%admin_choice%"=="14" goto GPO_BACKUP
 if "%admin_choice%"=="0" goto MENU
-call :CenterText "[ERROR] Invalid choice. Please try again."
+echo "[ERROR] Invalid choice. Please try again."
 pause
 goto ADMIN_MENU
 
 :UTILS_MENU
 cls
-call :CenterText "============================"
-call :CenterText "Windows Utilities Menu"
-call :CenterText "============================"
+echo "============================"
+echo "Windows Utilities Menu"
+echo "============================"
 echo.
-call :CenterText "1.  MassGrave"
-call :CenterText "2.  MassGrave Alternative"
-call :CenterText "3.  System Information Report"
-call :CenterText "4.  Disk Cleanup"
-call :CenterText "5.  Check for Windows Updates"
-call :CenterText "6.  Network Troubleshooter"
-call :CenterText "7.  Open Device Manager"
-call :CenterText "8.  Open Task Manager"
-call :CenterText "9.  Open Control Panel"
-call :CenterText "10. Backup User Data"
-call :CenterText "11. Restore System from Restore Point"
-call :CenterText "12. Run SFC / DISM for System Health"
-call :CenterText "13. Open Windows Explorer to Documents"
-call :CenterText "14. About / Credits"
-call :CenterText "15. Reboot / Shutdown Options"
-call :CenterText "0.  Back to Main Menu"
+echo "1.  MassGrave"
+echo "2.  MassGrave Alternative"
+echo "3.  System Information Report"
+echo "4.  Disk Cleanup"
+echo "5.  Check for Windows Updates"
+echo "6.  Network Troubleshooter"
+echo "7.  Open Device Manager"
+echo "8.  Open Task Manager"
+echo "9.  Open Control Panel"
+echo "10. Backup User Data"
+echo "11. Restore System from Restore Point"
+echo "12. Run SFC / DISM for System Health"
+echo "13. Open Windows Explorer to Documents"
+echo "14. About / Credits"
+echo "15. Reboot / Shutdown Options"
+echo "0.  Back to Main Menu"
 echo.
-call :CenterText "Enter your choice [0-15]:"
+echo "Enter your choice [0-15]:"
 set /p utils_choice=
 if "%utils_choice%"=="1" goto MASSGRAVE
 if "%utils_choice%"=="2" goto MASSGRAVEALT
@@ -168,7 +156,7 @@ if "%utils_choice%"=="13" goto OPEN_DOCS
 if "%utils_choice%"=="14" goto ABOUT
 if "%utils_choice%"=="15" goto REBOOT_SHUTDOWN
 if "%utils_choice%"=="0" goto MENU
-call :CenterText "[ERROR] Invalid choice. Please try again."
+echo "[ERROR] Invalid choice. Please try again."
 pause
 goto UTILS_MENU
 
@@ -177,81 +165,81 @@ goto UTILS_MENU
 
 
 :CLEAR_EVENT_LOGS
-call :CenterText "[INFO] Clearing all Windows Event Logs..."
+echo "[INFO] Clearing all Windows Event Logs..."
 for /F "tokens=*" %%G in ('wevtutil.exe el') DO wevtutil.exe cl "%%G"
-call :CenterText "[OK] Event logs cleared."
+echo "[OK] Event logs cleared."
 pause
 goto ADMIN_MENU
 
 :MANAGE_SERVICES
-call :CenterText "[INFO] Example: Restarting Print Spooler..."
+echo "[INFO] Example: Restarting Print Spooler..."
 net stop spooler
 net start spooler
 pause
 goto ADMIN_MENU
 
 :UPDATE_HISTORY
-call :CenterText "[INFO] Opening Windows Update History..."
+echo "[INFO] Opening Windows Update History..."
 start ms-settings:windowsupdate-history
 pause
 goto ADMIN_MENU
 
 :TOGGLE_UAC
-call :CenterText "[INFO] Toggling UAC..."
+echo "[INFO] Toggling UAC..."
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA
 pause
 goto ADMIN_MENU
 
 :GPO_BACKUP
-call :CenterText "[INFO] Exporting Local Group Policy..."
+echo "[INFO] Exporting Local Group Policy..."
 mkdir "%USERPROFILE%\Desktop\GPO-Backup"
 xcopy "%SystemRoot%\System32\GroupPolicy" "%USERPROFILE%\Desktop\GPO-Backup\GroupPolicy" /E /I /Y
-call :CenterText "[OK] GPO exported to Desktop\GPO-Backup."
+echo "[OK] GPO exported to Desktop\GPO-Backup."
 pause
 goto ADMIN_MENU
 
 :BACKUP_USERDATA
-call :CenterText "[INFO] Backing up user data (Documents, Desktop, Pictures)..."
+echo "[INFO] Backing up user data (Documents, Desktop, Pictures)..."
 set /p backupdest=Enter backup destination folder:
 xcopy "%USERPROFILE%\Documents" "%backupdest%\Documents" /E /I /Y
 xcopy "%USERPROFILE%\Desktop" "%backupdest%\Desktop" /E /I /Y
 xcopy "%USERPROFILE%\Pictures" "%backupdest%\Pictures" /E /I /Y
-call :CenterText "[OK] Backup complete."
+echo "[OK] Backup complete."
 pause
 goto UTILS_MENU
 
 :RESTORE_POINT
-call :CenterText "[INFO] Opening System Restore..."
+echo "[INFO] Opening System Restore..."
 start rstrui.exe
 pause
 goto UTILS_MENU
 
 :SFC_DISM
-call :CenterText "[INFO] Running SFC and DISM..."
+echo "[INFO] Running SFC and DISM..."
 sfc /scannow
 DISM /Online /Cleanup-Image /RestoreHealth
 pause
 goto UTILS_MENU
 
 :OPEN_DOCS
-call :CenterText "[INFO] Opening Documents folder..."
+echo "[INFO] Opening Documents folder..."
 start explorer "%USERPROFILE%\Documents"
 pause
 goto UTILS_MENU
 
 :ABOUT
 cls
-call :CenterText "=================================================="
-call :CenterText "Odyssey Batch Utility Script v1.0"
-call :CenterText "--------------------------------------------------"
-call :CenterText "Created by Colin"
-call :CenterText "For support, contact me on Teams"
-call :CenterText "--------------------------------------------------"
-call :CenterText "This script automates Windows setup, tweaks,"
-call :CenterText "and administration for rapid deployment."
-call :CenterText "--------------------------------------------------"
-call :CenterText "Thank you for using Odyssey!"
-call :CenterText "=================================================="
+echo "=================================================="
+echo "Odyssey Batch Utility Script v1.0"
+echo "--------------------------------------------------"
+echo "Created by Colin"
+echo "For support, contact me on Teams"
+echo "--------------------------------------------------"
+echo "This script automates Windows setup, tweaks,"
+echo "and administration for rapid deployment."
+echo "--------------------------------------------------"
+echo "Thank you for using Odyssey!"
+echo "=================================================="
 pause
 goto UTILS_MENU
 
@@ -265,27 +253,27 @@ if "%poweropt%"=="2" shutdown /s /t 0
 goto UTILS_MENU
 
 :ENABLE_BITLOCKER
-call :CenterText "[INFO] Enabling BitLocker on C: drive..."
+echo "[INFO] Enabling BitLocker on C: drive..."
 manage-bde -on C:
 if %errorlevel% neq 0 (
-    call :CenterText "[ERROR] Failed to start BitLocker encryption."
+    echo "[ERROR] Failed to start BitLocker encryption."
     pause
     goto ADMIN_MENU
 )
 
 echo.
-call :CenterText "[INFO] Monitoring BitLocker encryption progress. Press Ctrl+C to stop monitoring."
+echo "[INFO] Monitoring BitLocker encryption progress. Press Ctrl+C to stop monitoring."
 :BITLOCKER_ENCRYPT_PROGRESS
 manage-bde -status C: | find /i "Percentage Encrypted" >nul
 if %errorlevel% neq 0 (
-    call :CenterText "[OK] BitLocker encryption completed or not enabled."
+    echo "[OK] BitLocker encryption completed or not enabled."
     pause
     goto ADMIN_MENU
 )
 for /f "tokens=3" %%a in ('manage-bde -status C: ^| find "Percentage Encrypted"') do (
     set "progress=%%a"
     setlocal enabledelayedexpansion
-    call :CenterText "[PROGRESS] Encryption: !progress!"
+    echo "[PROGRESS] Encryption: !progress!"
     endlocal
 )
 timeout /t 5 >nul
@@ -318,99 +306,99 @@ pause
 goto ADMIN_MENU
 
 :REMOTE_DESKTOP
-call :CenterText "[INFO] Toggling Remote Desktop..."
+echo "[INFO] Toggling Remote Desktop..."
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Remote Desktop enabled."
+echo "[OK] Remote Desktop enabled."
 pause
 goto ADMIN_MENU
 
 :FIREWALL
-call :CenterText "[INFO] Toggling Windows Firewall..."
+echo "[INFO] Toggling Windows Firewall..."
 netsh advfirewall set allprofiles state off
-call :CenterText "[OK] Windows Firewall disabled."
+echo "[OK] Windows Firewall disabled."
 pause
 goto ADMIN_MENU
 
 :DISK_CLEANUP
-call :CenterText "[INFO] Running Disk Cleanup..."
+echo "[INFO] Running Disk Cleanup..."
 cleanmgr
 pause
 goto UTILS_MENU
 
 :WIN_UPDATES
-call :CenterText "[INFO] Checking for Windows Updates..."
+echo "[INFO] Checking for Windows Updates..."
 start ms-settings:windowsupdate
 pause
 goto UTILS_MENU
 
 :NET_TROUBLE
-call :CenterText "[INFO] Running Network Troubleshooter..."
+echo "[INFO] Running Network Troubleshooter..."
 msdt.exe /id NetworkDiagnosticsNetworkAdapter
 pause
 goto UTILS_MENU
 
 :DEVICE_MANAGER
-call :CenterText "[INFO] Opening Device Manager..."
+echo "[INFO] Opening Device Manager..."
 start devmgmt.msc
 pause
 goto UTILS_MENU
 
 :TASK_MANAGER
-call :CenterText "[INFO] Opening Task Manager..."
+echo "[INFO] Opening Task Manager..."
 start taskmgr
 pause
 goto UTILS_MENU
 
 :CONTROL_PANEL
-call :CenterText "[INFO] Opening Control Panel..."
+echo "[INFO] Opening Control Panel..."
 start control
 pause
 goto UTILS_MENU
 
 :DISABLE_BITLOCKER
 :: Disable BitLocker and show live progress
-call :CenterText "[INFO] Checking BitLocker status..."
+echo "[INFO] Checking BitLocker status..."
 manage-bde -status C:
 
 echo.
-call :CenterText "[INFO] Disabling BitLocker on C: drive..."
+echo "[INFO] Disabling BitLocker on C: drive..."
 manage-bde -off C:
 
 echo.
-call :CenterText "[INFO] Monitoring BitLocker decryption progress. Press Ctrl+C to stop monitoring."
+echo "[INFO] Monitoring BitLocker decryption progress. Press Ctrl+C to stop monitoring."
 :BITLOCKER_PROGRESS
 for /f "tokens=3" %%a in ('manage-bde -status C: ^| find "Percentage"') do (
     set "progress=%%a"
     setlocal enabledelayedexpansion
-    call :CenterText "[PROGRESS] Decryption: !progress!"
+    echo "[PROGRESS] Decryption: !progress!"
     endlocal
 )
 timeout /t 5 >nul
 manage-bde -status C: | find "Percentage" >nul
 if %errorlevel%==0 goto BITLOCKER_PROGRESS
 
-call :CenterText "[OK] BitLocker decryption completed or not enabled."
+echo "[OK] BitLocker decryption completed or not enabled."
 pause
 goto MENU
 
 :INFO
-call :CenterText "[INFO] Generating system information report..."
+echo "[INFO] Generating system information report..."
 systeminfo > "%USERPROFILE%\Desktop\SystemInfo.txt" 2>nul
 if %errorlevel% neq 0 (
-    call :CenterText "[WARN] systeminfo failed. Trying MSINFO32..."
+    echo "[WARN] systeminfo failed. Trying MSINFO32..."
     msinfo32 /report "%USERPROFILE%\Desktop\SystemInfo.txt"
     if %errorlevel% neq 0 (
-        call :CenterText "[ERROR] Both systeminfo and msinfo32 failed to generate a report."
+        echo "[ERROR] Both systeminfo and msinfo32 failed to generate a report."
         pause
         goto MENU
     )
 )
-call :CenterText "[OK] Report saved to Desktop."
-call :CenterText "[INFO] You can view the report by opening SystemInfo.txt on Desktop."
-call :CenterText "[NOTE] This report includes system configuration and network details."
-call :CenterText "[NOTE] If you need to share, ensure it does not contain sensitive information."
-call :CenterText "[NOTE] You can also use this report for troubleshooting purposes."
-call :CenterText "[NOTE] If not found in usual location, check C:\Users\username\Desktop"
+echo "[OK] Report saved to Desktop."
+echo "[INFO] You can view the report by opening SystemInfo.txt on Desktop."
+echo "[NOTE] This report includes system configuration and network details."
+echo "[NOTE] If you need to share, ensure it does not contain sensitive information."
+echo "[NOTE] You can also use this report for troubleshooting purposes."
+echo "[NOTE] If not found in usual location, check C:\Users\username\Desktop"
 pause
 goto MENU
 
@@ -421,34 +409,34 @@ set /p usertype=Should this user be an Administrator? (Y/N):
 
 if /i "%usertype%"=="Y" (
     net localgroup administrators %newuser% /add
-    call :CenterText "[OK] User %newuser% created and added to Administrators."
+    echo "[OK] User %newuser% created and added to Administrators."
 ) else (
-    call :CenterText "[OK] Standard user %newuser% created."
+    echo "[OK] Standard user %newuser% created."
 )
 
 pause
 goto MENU
 
 :GAMCO
-call :CenterText "[INFO] Adding Registry Files For Autodiscovery..."
+echo "[INFO] Adding Registry Files For Autodiscovery..."
 reg add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\16.0\Outlook\AutoDiscover" /v "ExcludeExplicitO365Endpoint" /t REG_DWORD /d 1 /f
 pause
 goto MENU
 
 :MASSGRAVE
-call :CenterText "[INFO] Starting MassGrave..."
+echo "[INFO] Starting MassGrave..."
 powershell -NoProfile -Command "irm https://get.activated.win | iex"
 pause
 goto MENU
 
 :MASSGRAVEALT
-call :CenterText "[INFO] Starting MassGrave Alternative..."
+echo "[INFO] Starting MassGrave Alternative..."
 powershell -NoProfile -Command "irm https://massgrave.dev/get | iex"
 pause
 goto MENU
 
 :STARTMAIN
-call :CenterText "[INFO] Starting Main Setup..."
+echo "[INFO] Starting Main Setup..."
 timeout /t 5 /nobreak >nul
 
 ::=================================================
@@ -464,11 +452,11 @@ if %errorlevel% NEQ 0 (
 ::=================================================
 :: Uninstall Bloatware via Winget
 ::=================================================
-call :CenterText "[INFO] Uninstalling default bloatware..."
+echo "[INFO] Uninstalling default bloatware..."
 powershell -NoProfile -Command "winget uninstall --id 'McAfee.wps'"
 powershell -NoProfile -Command "winget uninstall --id 'Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe'"
-call :CenterText "[OK] Bloatware removed (check Control Panel to verify)."
-call :CenterText "[INFO] You may need to log off/log back in for changes to take effect."
+echo "[OK] Bloatware removed (check Control Panel to verify)."
+echo "[INFO] You may need to log off/log back in for changes to take effect."
 timeout /t 5 /nobreak >nul
 
 
@@ -477,15 +465,15 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 set "installDir=C:\_install"
 if not exist "%installDir%" (
-    call :CenterText "[INFO] Creating directory %installDir%..."
+    echo "[INFO] Creating directory %installDir%..."
     mkdir "%installDir%"
-    call :CenterText "[OK] Directory created."
+    echo "[OK] Directory created."
 ) else (
-    call :CenterText "[INFO] Directory already exists: %installDir%"
+    echo "[INFO] Directory already exists: %installDir%"
 )
 
-call :CenterText "[INFO] If you run into a problem, please reboot your computer and run script again."
-call :CenterText "[INFO] After reboot, run this script again to continue installation."
+echo "[INFO] If you run into a problem, please reboot your computer and run script again."
+echo "[INFO] After reboot, run this script again to continue installation."
 
 ::=================================================
 :: Winget Actions (Update/Import) This is commented due to testing at the monent (but this code does work)
@@ -505,9 +493,9 @@ if not exist "%~dp0installed-apps.json" (
     )
 )
 
-call :CenterText "[INFO] Starting Winget import..."
+echo "[INFO] Starting Winget import..."
 powershell -NoProfile -Command "winget import -i 'installed-apps.json'"
-call :CenterText "[OK] Import complete."
+echo "[OK] Import complete."
 
 set /p updateChoice=Do you want to check for updates with winget? (Y/N):
 if /I "%updateChoice%"=="Y" (
@@ -526,7 +514,7 @@ if /I "%updateChoice%"=="Y" (
 :: File Associations (Manual Registry Method)
 ::=================================================
 :: Adobe Acrobat for PDFs
-call :CenterText "[INFO] Setting default apps for PDF..."
+echo "[INFO] Setting default apps for PDF..."
 
 set "adobePath=C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
 set "progId=AcroExch.Document"
@@ -540,12 +528,12 @@ if not exist "%adobePath%" (
 reg add "HKCU\Software\Classes\.pdf" /ve /d "%progId%" /f
 reg add "HKCU\Software\Classes\%progId%\shell\open\command" /ve /d "\"%adobePath%\" \"%%1\"" /f
 reg add "HKCU\Software\Classes\%progId%\DefaultIcon" /ve /d "\"%adobePath%\",1" /f
-call :CenterText "[OK] Default app for PDF set to Adobe Acrobat."
+echo "[OK] Default app for PDF set to Adobe Acrobat."
 timeout /t 5 /nobreak >nul
 
 
 :: Outlook for MAILTO and .MSG
-call :CenterText "[INFO] Setting Outlook as default for MAILTO and MSG files..."
+echo "[INFO] Setting Outlook as default for MAILTO and MSG files..."
 
 set "outlookPath=C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
 
@@ -564,7 +552,7 @@ reg add "HKCU\Software\Classes\.msg" /ve /d "Outlook.File.msg" /f
 reg add "HKCU\Software\Classes\Outlook.File.msg\shell\open\command" /ve /d "\"%outlookPath%\" \"%%1\"" /f
 reg add "HKCU\Software\Classes\Outlook.File.msg\DefaultIcon" /ve /d "\"%outlookPath%\",1" /f
 
-call :CenterText "[OK] Registry entries for default apps have been set."
+echo "[OK] Registry entries for default apps have been set."
 echo [INFO] You may need to log off/log back in for changes to take effect.
 timeout /t 5 /nobreak >nul
 
@@ -572,7 +560,7 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 :: Enforce File Type Associations with SetUserFTA
 ::=================================================
-call :CenterText "[INFO] Enforcing file type associations with SetUserFTA..."
+echo "[INFO] Enforcing file type associations with SetUserFTA..."
 :: Ensure SetUserFTA.exe exists in script folder; download from GitHub raw if missing
 if not exist "%~dp0SetUserFTA.exe" (
     echo [INFO] SetUserFTA.exe not found locally -- attempting download...
@@ -600,7 +588,7 @@ powershell -NoProfile -Command ".\SetUserFTA.exe .url Google.Chrome"
 powershell -NoProfile -Command ".\SetUserFTA.exe .htm ChromeHTML"
 powershell -NoProfile -Command ".\SetUserFTA.exe .html ChromeHTML"
 
-call :CenterText "[OK] File type associations have been set."
+echo "[OK] File type associations have been set."
 echo [INFO] You may need to log off/log back in for changes to take effect.
 echo [NOTE] For enforcement issues, consult SetUserFTA documentation.
 timeout /t 5 /nobreak >nul
@@ -609,9 +597,9 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 :: Set Time Zone to South Africa Standard Time (SAST)
 ::=================================================
-call :CenterText "[INFO] Setting time zone to South Africa Standard Time..."
+echo "[INFO] Setting time zone to South Africa Standard Time..."
 tzutil /s "South Africa Standard Time"
-call :CenterText "[OK] Time zone set to SAST (UTC+2)."
+echo "[OK] Time zone set to SAST (UTC+2)."
 echo [INFO] You may need to log off/log back in for changes to take effect.
 timeout /t 5 /nobreak >nul
 
@@ -619,10 +607,10 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 :: Display Current Time Zone
 ::=================================================
-call :CenterText "[INFO] Displaying current time zone..."
+echo "[INFO] Displaying current time zone..."
 for /f "tokens=*" %%a in ('tzutil /g') do set timezone=%%a
-call :CenterText "[INFO] Current system time zone: %timezone%"
-call :CenterText "[OK] Time zone displayed."
+echo "[INFO] Current system time zone: %timezone%"
+echo "[OK] Time zone displayed."
 echo [INFO] You may need to log off/log back in for changes to take effect.
 timeout /t 5 /nobreak >nul
 
@@ -630,49 +618,49 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 :: Disable Fast Startup (Hiberboot)
 ::=================================================
-call :CenterText "[INFO] Disabling Fast Startup..."
+echo "[INFO] Disabling Fast Startup..."
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Fast Startup has been disabled."
+echo "[OK] Fast Startup has been disabled."
 timeout /t 5 /nobreak >nul
 
 
 ::=================================================
 :: Set Power Plan to Balanced
 ::=================================================
-call :CenterText "[INFO] Setting power plan to Balanced..."
+echo "[INFO] Setting power plan to Balanced..."
 powercfg -setactive SCHEME_BALANCED
 
 :: Optional: Uncomment for High Performance or Ultimate Performance
 :: powercfg -setactive SCHEME_MIN
 :: powercfg -setactive SCHEME_MAX
 
-call :CenterText "[OK] Power plan set."
+echo "[OK] Power plan set."
 timeout /t 5 /nobreak >nul
 
 ::=================================================
 :: Disable Suggested Apps in Start Menu
 ::=================================================
-call :CenterText "[INFO] Disabling suggested apps in Start Menu..."
+echo "[INFO] Disabling suggested apps in Start Menu..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SystemPaneSuggestionsEnabled /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Suggested apps disabled."
+echo "[OK] Suggested apps disabled."
 
 ::=================================================
 :: Disable Sticky Keys Shortcut Prompts
 ::=================================================
-call :CenterText "[INFO] Disabling Sticky Keys shortcut prompts..."
+echo "[INFO] Disabling Sticky Keys shortcut prompts..."
 reg add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f
 reg add "HKCU\Control Panel\Accessibility\Keyboard Response" /v Flags /t REG_SZ /d 122 /f
 reg add "HKCU\Control Panel\Accessibility\ToggleKeys" /v Flags /t REG_SZ /d 58 /f
-call :CenterText "[OK] Sticky Keys prompts disabled."
+echo "[OK] Sticky Keys prompts disabled."
 
 ::=================================================
 :: Disable Windows Telemetry
 ::=================================================
-call :CenterText "[INFO] Disabling Windows Telemetry..."
+echo "[INFO] Disabling Windows Telemetry..."
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f
 timeout /t 5 /nobreak >nul
 
-call :CenterText "[OK] Windows Telemetry disabled."
+echo "[OK] Windows Telemetry disabled."
 echo [INFO] You may need to log off/log back in for changes to take effect.
 timeout /t 5 /nobreak >nul
 
@@ -680,37 +668,37 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 :: Disable Cortana
 ::=================================================
-call :CenterText "[INFO] Disabling Cortana..."
+echo "[INFO] Disabling Cortana..."
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v AllowCortana /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Cortana disabled."
+echo "[OK] Cortana disabled."
 timeout /t 5 /nobreak >nul
 
 
 ::=================================================
 :: Disable Windows Spotlight    
 ::=================================================
-call :CenterText "[INFO] Disabling Windows Spotlight..."
+echo "[INFO] Disabling Windows Spotlight..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SubscribedContent-338389Enabled /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Windows Spotlight disabled."
+echo "[OK] Windows Spotlight disabled."
 timeout /t 5 /nobreak >nul
 
 
 ::=================================================
 :: Set Explorer to open "This PC" instead of Quick Access
 ::=================================================
-call :CenterText "[INFO] Setting Explorer to open This PC instead of Quick Access..."
+echo "[INFO] Setting Explorer to open This PC instead of Quick Access..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f
-call :CenterText "[OK] Explorer settings updated."
+echo "[OK] Explorer settings updated."
 timeout /t 5 /nobreak >nul
 
 
 ::=================================================
 :: Show Hidden Files and File Extensions
 ::=================================================
-call :CenterText "[INFO] Showing hidden files and file extensions..."
+echo "[INFO] Showing hidden files and file extensions..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Hidden /t REG_DWORD /d 1 /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Hidden files and file extensions are now visible."
+echo "[OK] Hidden files and file extensions are now visible."
 timeout /t 5 /nobreak >nul
 
 ::=================================================
@@ -719,11 +707,11 @@ timeout /t 5 /nobreak >nul
 :: Note: This may affect gaming performance and features.
 :: If you are a gamer, consider keeping these features enabled.
 ::=================================================
-call :CenterText "[INFO] Disabling Xbox Game Bar and Game DVR..."
+echo "[INFO] Disabling Xbox Game Bar and Game DVR..."
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR" /v AppCaptureEnabled /t REG_DWORD /d 0 /f
 reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v AllowGameDVR /t REG_DWORD /d 0 /f
-call :CenterText "[OK] Xbox Game Bar and Game DVR disabled."
+echo "[OK] Xbox Game Bar and Game DVR disabled."
 
 ::=================================================
 :: Enable .NET Framework 3.5 (if not already enabled)
@@ -765,7 +753,7 @@ call :CenterText "[OK] Xbox Game Bar and Game DVR disabled."
 :: Note: This feature allows you to access your clipboard history.
 :: It is recommended to enable this feature for better productivity.
 ::=================================================
-call :CenterText "[INFO] Checking for Clipboard History feature..."
+echo "[INFO] Checking for Clipboard History feature..."
 
 reg query "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory >nul 2>&1
 if %errorlevel%==0 (
@@ -797,7 +785,7 @@ setlocal EnableDelayedExpansion
 ::=================================================
 :: Create Shortcuts on Desktop and Pin to Start/Taskbar
 ::=================================================
-call :CenterText "[INFO] Creating shortcuts on desktop and pinning to Start/Taskbar..."
+echo "[INFO] Creating shortcuts on desktop and pinning to Start/Taskbar..."
 
 :: Get current user's desktop path
 for /f "tokens=2,*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop 2^>nul') do set "desktop=%%b"
@@ -896,13 +884,13 @@ if %ver_major% LSS 10 (
 ::=========================================
 :: Disable Task View Button
 ::=========================================
-call :CenterText "[INFO] Disabling Task View button..."
+echo "[INFO] Disabling Task View button..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ShowTaskViewButton /t REG_DWORD /d 0 /f
 
 ::=========================================
 :: Disable Task View Button
 ::=========================================
-call :CenterText "[INFO] Disabling Widgets button..."
+echo "[INFO] Disabling Widgets button..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f
 
 ::=========================================
@@ -913,7 +901,7 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Ta
 ::   2 = Search box
 ::   3 = Search (depends on Windows version)
 ::=========================================
-call :CenterText "[INFO] Setting Search to 'Search Box Only'..."
+echo "[INFO] Setting Search to 'Search Box Only'..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 1 /f
 
 ::=========================================
@@ -922,18 +910,18 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTask
 ::   0 = Left
 ::   1 = Center
 ::=========================================
-call :CenterText "[INFO] Aligning Taskbar to Center..."
+echo "[INFO] Aligning Taskbar to Center..."
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAl /t REG_DWORD /d 0 /f
 
 ::=========================================
 :: Restart Explorer to apply changes
 ::=========================================
-call :CenterText "[INFO] Restarting Explorer to apply changes..."
+echo "[INFO] Restarting Explorer to apply changes..."
 taskkill /f /im explorer.exe >nul 2>&1
 timeout /t 2 /nobreak >nul
 start explorer.exe
 
-call :CenterText "[OK] Taskbar tweaks applied successfully."
+echo "[OK] Taskbar tweaks applied successfully."
 
 
 ::=================================================
@@ -970,7 +958,7 @@ if %errorlevel%==0 (
 :: Open Windows Update settings
 start ms-settings:windowsupdate
 
-echo [INFO] Windows Update process started.
+echo "[INFO] Windows Update process started."
 
 ::=================================================
 :: Set Computer Name
