@@ -1,8 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
 title Odyssey V1 PRE ALPHA - 2025 Edition
-echo.
-color 2
 
 :: Check for Administrator Privileges
 >nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
@@ -14,14 +12,14 @@ if %errorlevel% NEQ 0 (
 
 :MENU
 cls
-echo ============================
-echo   Windows Setup Main Menu
-echo ============================
-echo 1. Start Main Setup
-echo 2. Administration Menu
-echo 3. Utils Menu
-echo 4. Hot Fixes Menu
-echo 0. Exit
+echo                    ============================
+echo                      Windows Setup Main Menu
+echo                    ============================
+echo                    1. Start Main Setup
+echo                    2. Administration Menu
+echo                    3. Utils Menu
+echo                    4. Hot Fixes Menu
+echo                    0. Exit
 echo.
 set /p choice=Enter your choice [0-4]: 
 
@@ -35,11 +33,11 @@ goto MENU
 
 :HOTFIXES_MENU
 cls
-echo ============================
-echo   Windows Hot Fixes Menu
-echo ============================
-echo 1. Fix BitLocker Encryption Error Code 0x8004100e
-echo 0. Back to Main Menu
+echo                    ============================
+echo                      Windows Hot Fixes Menu
+echo                    ============================
+echo                    1. Fix BitLocker Encryption Error Code 0x8004100e
+echo                    0. Back to Main Menu
 echo.
 set /p hotfix_choice=Enter your choice [0-1]:
 
@@ -58,24 +56,24 @@ goto HOTFIXES_MENU
 
 :ADMIN_MENU
 cls
-echo ============================
-echo   Windows Administration Menu
-echo ============================
-echo 1.  Disable BitLocker
-echo 2.  Create New User
-echo 3.  Gamco Registry Setup Fix
-echo 4.  Enable BitLocker
-echo 5.  Change Computer Name
-echo 6.  Set Local Administrator Password
-echo 7.  Join Domain / Workgroup
-echo 8.  Enable/Disable Remote Desktop
-echo 9.  Enable/Disable Windows Firewall
-echo 10. Clear Windows Event Logs
-echo 11. Manage Windows Services
-echo 12. View Windows Update History
-echo 13. Enable/Disable UAC
-echo 14. Export/Import Local Group Policy
-echo 0.  Back to Main Menu
+echo                    ============================
+echo                      Windows Administration Menu
+echo                    ============================
+echo                    1.  Disable BitLocker
+echo                    2.  Create New User
+echo                    3.  Gamco Registry Setup Fix
+echo                    4.  Enable BitLocker
+echo                    5.  Change Computer Name
+echo                    6.  Set Local Administrator Password
+echo                    7.  Join Domain / Workgroup
+echo                    8.  Enable/Disable Remote Desktop
+echo                    9.  Enable/Disable Windows Firewall
+echo                    10. Clear Windows Event Logs
+echo                    11. Manage Windows Services
+echo                    12. View Windows Update History
+echo                    13. Enable/Disable UAC
+echo                    14. Export/Import Local Group Policy
+echo                    0.  Back to Main Menu
 echo.
 set /p admin_choice=Enter your choice [0-14]:
 
@@ -100,25 +98,25 @@ goto ADMIN_MENU
 
 :UTILS_MENU
 cls
-echo ============================
-echo   Windows Utilities Menu
-echo ============================
-echo 1.  MassGrave
-echo 2.  MassGrave Alternative
-echo 3.  System Information Report
-echo 4.  Disk Cleanup
-echo 5.  Check for Windows Updates
-echo 6.  Network Troubleshooter
-echo 7.  Open Device Manager
-echo 8.  Open Task Manager
-echo 9.  Open Control Panel
-echo 10. Backup User Data
-echo 11. Restore System from Restore Point
-echo 12. Run SFC / DISM for System Health
-echo 13. Open Windows Explorer to Documents
-echo 14. About / Credits
-echo 15. Reboot / Shutdown Options
-echo 0.  Back to Main Menu
+echo                    ============================
+echo                      Windows Utilities Menu
+echo                    ============================
+echo                    1.  MassGrave
+echo                    2.  MassGrave Alternative
+echo                    3.  System Information Report
+echo                    4.  Disk Cleanup
+echo                    5.  Check for Windows Updates
+echo                    6.  Network Troubleshooter
+echo                    7.  Open Device Manager
+echo                    8.  Open Task Manager
+echo                    9.  Open Control Panel
+echo                    10. Backup User Data
+echo                    11. Restore System from Restore Point
+echo                    12. Run SFC / DISM for System Health
+echo                    13. Open Windows Explorer to Documents
+echo                    14. About / Credits
+echo                    15. Reboot / Shutdown Options
+echo                    0.  Back to Main Menu
 echo.
 
 set /p utils_choice=Enter your choice [0-15]:
