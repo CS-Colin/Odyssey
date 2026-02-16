@@ -171,7 +171,7 @@ if "%utils_choice%"=="13" goto OPEN_DOCS
 if "%utils_choice%"=="14" goto ABOUT
 if "%utils_choice%"=="15" goto REBOOT_SHUTDOWN
 if "%utils_choice%"=="0" goto MENU
-echo "[ERROR] Invalid choice. Please try again."
+echo [ERROR] Invalid choice. Please try again.
 pause
 goto UTILS_MENU
 
@@ -230,7 +230,7 @@ pause
 goto UTILS_MENU
 
 :SFC_DISM
-echo "INFO] Running SFC and DISM...
+echo [INFO] Running SFC and DISM...
 sfc /scannow
 DISM /Online /Cleanup-Image /RestoreHealth
 pause
@@ -287,14 +287,14 @@ echo [INFO] Monitoring BitLocker encryption progress. Press Ctrl+C to stop monit
 :BITLOCKER_ENCRYPT_PROGRESS
 manage-bde -status C: | find /i "Percentage Encrypted" >nul
 if %errorlevel% neq 0 (
-    echo "[OK] BitLocker encryption completed or not enabled."
+    echo [OK] BitLocker encryption completed or not enabled.
     pause
     goto ADMIN_MENU
 )
 for /f "tokens=3" %%a in ('manage-bde -status C: ^| find "Percentage Encrypted"') do (
     set "progress=%%a"
     setlocal enabledelayedexpansion
-    echo "[PROGRESS] Encryption: !progress!"
+    echo [PROGRESS] Encryption: !progress!
     endlocal
 )
 timeout /t 5 >nul
@@ -535,7 +535,7 @@ if /I "%updateChoice%"=="Y" (
 :: File Associations (Manual Registry Method)
 ::=================================================
 :: Adobe Acrobat for PDFs
-echo "[INFO] Setting default apps for PDF..."
+echo [INFO] Setting default apps for PDF...
 
 set "adobePath=C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
 set "progId=AcroExch.Document"
@@ -709,7 +709,7 @@ timeout /t 5 /nobreak >nul
 ::=================================================
 echo [INFO] Setting Explorer to open This PC instead of Quick Access...
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v LaunchTo /t REG_DWORD /d 1 /f
-echo "[OK] Explorer settings updated."
+echo [OK] Explorer settings updated.
 timeout /t 5 /nobreak >nul
 
 
@@ -806,7 +806,7 @@ setlocal EnableDelayedExpansion
 ::=================================================
 :: Create Shortcuts on Desktop and Pin to Start/Taskbar
 ::=================================================
-echo "[INFO] Creating shortcuts on desktop and pinning to Start/Taskbar..."
+echo [INFO] Creating shortcuts on desktop and pinning to Start/Taskbar...
 
 :: Get current user's desktop path
 for /f "tokens=2,*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop 2^>nul') do set "desktop=%%b"
