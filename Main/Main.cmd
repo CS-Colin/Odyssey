@@ -503,11 +503,11 @@ echo [INFO] After reboot, run this script again to continue installation.
 ::=========================================
 :: Check if winget is installed
 ::=========================================
-:: Ensure installed-apps.json exists in script folder; download from GitHub raw if missing
-if not exist "%~dp0installed-apps.json" (
+:: Ensure installed-apps.json exists in C:\_install; download from GitHub raw if missing
+if not exist "C:\_install\installed-apps.json" (
     echo [INFO] installed-apps.json not found locally -- attempting download...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/installed-apps.json' -OutFile '%~dp0installed-apps.json' -UseBasicParsing; exit 0 } catch { exit 1 }"
-    if not exist "%~dp0installed-apps.json" (
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/installed-apps.json' -OutFile 'C:\_install\installed-apps.json' -UseBasicParsing; exit 0 } catch { exit 1 }"
+    if not exist "C:\_install\installed-apps.json" (
         echo [WARN] Could not download installed-apps.json; winget import may fail.
     ) else (
         echo [OK] installed-apps.json downloaded.
@@ -515,8 +515,7 @@ if not exist "%~dp0installed-apps.json" (
 )
 
 echo [INFO] Starting Winget import...
-cd /d "%~dp0"
-powershell -NoProfile -Command "winget import -i '%CD%\installed-apps.json'"
+powershell -NoProfile -Command "winget import -i 'C:\_install\installed-apps.json'"
 echo [OK] Import complete.
 
 set /p updateChoice=Do you want to check for updates with winget? (Y/N):
