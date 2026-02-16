@@ -515,7 +515,8 @@ if not exist "%~dp0installed-apps.json" (
 )
 
 echo [INFO] Starting Winget import...
-powershell -NoProfile -Command "winget import -i '%~dp0installed-apps.json'"
+cd /d "%~dp0"
+powershell -NoProfile -Command "winget import -i '%CD%\installed-apps.json'"
 echo [OK] Import complete.
 
 set /p updateChoice=Do you want to check for updates with winget? (Y/N):
