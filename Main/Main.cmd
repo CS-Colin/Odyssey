@@ -48,6 +48,7 @@ echo:                            Windows Hot Fixes Menu
 echo:                        ============================
 echo:                 
 echo:              [1] Fix BitLocker Encryption Error Code 0x8004100e
+echo:              [2] Disable UDP for RDP
 echo:                 ______________________________________________      
 echo:                                                                         
 echo:                           [0] Go to Main Menu
@@ -58,6 +59,7 @@ echo Enter your choice [0-1]:
 set /p hotfix_choice=
 
 if "%hotfix_choice%"=="1" goto FIX_BITLOCKER
+if "%hotfix_choice%"=="2" goto DISABLE_UDP_RDP
 if "%hotfix_choice%"=="0" goto MENU
 echo [ERROR] Invalid choice. Please try again.
 pause
@@ -71,6 +73,11 @@ echo [OK] MOF file recompiled. Please try enabling BitLocker again.
 echo [NOTE] If the issue persists, consider running SFC / DISM or checking for Windows Updates.
 pause
 goto HOTFIXES_MENU
+
+:DISABLE_UDP_RDP
+cls
+echo [INFO] Disabling UDP for RDP to improve stability on some networks...
+reg add "HKLM\software\policies\microsoft\windows nt\Terminal Services\Client" /v fClientDisableUDP /d 1 /t REG_DWORD
 
 :ADMIN_MENU
 cls
