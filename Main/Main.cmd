@@ -78,6 +78,9 @@ goto HOTFIXES_MENU
 cls
 echo [INFO] Disabling UDP for RDP to improve stability on some networks...
 reg add "HKLM\software\policies\microsoft\windows nt\Terminal Services\Client" /v fClientDisableUDP /d 1 /t REG_DWORD
+echo [OK] UDP for RDP has been disabled. You may need to reboot for changes to take effect.
+pause
+goto HOTFIXES_MENU
 
 :ADMIN_MENU
 cls
