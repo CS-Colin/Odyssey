@@ -46,7 +46,7 @@ echo:                        ============================
 echo:                          Windows Debloater Menu
 echo:                        ============================
 echo:
-echo:                   [1] Debloat Windows(GitHub Script - Sycnex)
+echo:                   [1] Debloat Windows (GitHub Script - Sycnex)
 echo:                    [2] Debloat Windows (Chiris Titus Script)
 echo:
 echo:               ________________________________________________
