@@ -22,6 +22,7 @@ echo:                           [1] Start Main Setup
 echo:                           [2] Administration Menu
 echo:                           [3] Utilities Menu
 echo:                           [4] Windows Hot Fixes Menu
+echo:                           [5] Windows Debloater Menu
 echo:                 ______________________________________________      
 echo:                                                                         
 echo:                           [0] Go to Main Menu
@@ -35,6 +36,42 @@ if "%choice%"=="1" goto STARTMAIN
 if "%choice%"=="2" goto ADMIN_MENU
 if "%choice%"=="3" goto UTILS_MENU
 if "%choice%"=="4" goto HOTFIXES_MENU
+if "%choice%"=="5" goto DEBLOATER_MENU
+
+:DEBLOATER_MENU
+cls
+echo:            ______________________________________________________
+echo:
+echo:                        ============================
+echo:                          Windows Debloater Menu
+echo:                        ============================
+echo:
+echo:                   [1] Debloat Windows(GitHub Script - Sycnex)
+echo:                    [2] Debloat Windows (Chiris Titus Script)
+echo:
+echo:               ________________________________________________
+echo:
+echo:                           [0] Go to Main Menu
+echo:            ______________________________________________________
+echo:
+echo.
+echo Enter your choice [0-10]:
+set /p debloat_choice=
+if "%debloat_choice%"=="1" goto DEBLOAT_WINDOWS
+if "%debloat_choice%"=="2" goto CHRIS_TITUS_DEBLOAT
+echo [ERROR] Invalid choice. Please try again.
+pause
+goto DEBLOATER_MENU
+:DEBLOAT_WINDOWS
+echo [INFO] Starting Windows Debloater...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://git.io/debloat | iex"
+echo [OK] Debloat script executed. Please review the output for any errors.
+
+:CHRIS_TITUS_DEBLOAT
+echo [INFO] Starting Chris Titus Windows Debloater...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://christitus.com/win | iex"
+echo [OK] Chris Titus debloat script executed. Please review the output for any errors.
+
 
 if "%choice%"=="0" exit /b
 goto MENU
