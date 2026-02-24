@@ -51,7 +51,7 @@ The main menu of the script is organized into several submenus:
 2. Open an elevated command prompt ("Run as administrator").
 3. Navigate to the `Main` directory:
    ```batch
-   cd \path\to\Oddssey\Main
+   cd \path\to\Oddssey\Master
    ```
 4. Execute the script:
    ```batch
@@ -82,4 +82,4 @@ This project is provided "as-is" with no warranty. Feel free to adapt or redistr
 
 ---
 
-*Generated on February 24, 2026.*
+*Created on February 24, 2026.*
