@@ -12,6 +12,7 @@ The main menu of the script is organized into several submenus:
 
 ### Main Setup
 - Placeholder for future setup routines (not currently implemented).
+- Only run Start Main Setup IF YOU ARE SETTING UP A COMPUTER
 
 ### Administration Menu
 - Disable/enable BitLocker
