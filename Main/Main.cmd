@@ -225,10 +225,6 @@ echo [ERROR] Invalid choice. Please try again.
 pause
 goto UTILS_MENU
 
-
-
-
-
 :CLEAR_EVENT_LOGS
 echo [INFO] Clearing all Windows Event Logs...
 for /F "tokens=*" %%G in ('wevtutil.exe el') DO wevtutil.exe cl "%%G"
@@ -301,7 +297,7 @@ echo:                 Batch Utility Script  v1.0
 echo:   ================================================================
 echo:
 echo:        Created by Colin
-echo:        Support: Microsoft Teams
+echo:        Support: https://github.com/CS-Colin/Odyssey/
 echo:
 echo:   ----------------------------------------------------------------
 echo:        Automated Windows Setup • Tweaks • Administration
