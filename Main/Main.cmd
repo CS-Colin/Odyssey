@@ -967,4 +967,5 @@ if /i "%confirm%"=="Y" (
 if /i "%confirm%"=="N" (
     echo Cancelled by user.
     pause
+)
 goto MENU
