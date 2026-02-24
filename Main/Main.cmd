@@ -959,20 +959,12 @@ echo New PC Name: %NewName%
 
 :: Confirm
 set /p confirm=Do you want to rename the PC to "%NewName%" and restart? (Y/N): 
-if /i not "%confirm%"=="Y" (
-    echo Operation cancelled.
+if /i "%confirm%"=="Y" (
+    echo Rename command issued. Restarting...
+    powershell -Command "Rename-Computer -NewName '%NewName%' -Force -Restart"
     exit /b
 )
-
-:: Rename using PowerShell
-powershell -Command "Rename-Computer -NewName '%NewName%' -Force -Restart"
-
-if %errorlevel%==0 (
-    echo Rename command issued. Restarting...
-) else (
-    echo [ERROR] Failed to issue rename command.
-    echo [INFO] Make sure you are running as Administrator.
-)
-
-pause
+if /i "%confirm%"=="N" (
+    echo Cancelled by user.
+    pause
 goto MENU
