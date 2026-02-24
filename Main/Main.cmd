@@ -59,6 +59,8 @@ echo Enter your choice [0-10]:
 set /p debloat_choice=
 if "%debloat_choice%"=="1" goto DEBLOAT_WINDOWS
 if "%debloat_choice%"=="2" goto CHRIS_TITUS_DEBLOAT
+if "%debloat_choice%"=="0" goto MENU
+
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto DEBLOATER_MENU
