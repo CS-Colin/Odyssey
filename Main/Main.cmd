@@ -62,6 +62,7 @@ if "%debloat_choice%"=="2" goto CHRIS_TITUS_DEBLOAT
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto DEBLOATER_MENU
+
 :DEBLOAT_WINDOWS
 echo [INFO] Starting Windows Debloater...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://git.io/debloat | iex"
