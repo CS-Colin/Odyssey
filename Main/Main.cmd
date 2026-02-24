@@ -503,13 +503,6 @@ if not exist "%installDir%" (
     echo [INFO] Directory already exists: %installDir%
 )
 
-echo [INFO] If you run into a problem, please reboot your computer and run script again.
-echo [INFO] After reboot, run this script again to continue installation.
-
-::=================================================
-:: Winget Actions (Update/Import) This is commented due to testing at the monent (but this code does work)
-::=================================================
-
 ::=========================================
 :: Check if winget is installed
 ::=========================================
@@ -528,6 +521,14 @@ echo [INFO] Starting Winget import...
 powershell -NoProfile -Command "winget import -i 'C:\_install\installed-apps.json'"
 echo [OK] Import complete.
 
+set /p installoffice=Would you like to install Microsoft Office? (Y/N):
+if /I "%installoffice%"=="Y" (
+    echo [INFO] Installing Microsoft Office via winget...
+    powershell -NoProfile -Command "winget install --id Microsoft.Office -e --accept-source-agreements --accept-package-agreements"
+) else (
+    echo [INFO] Skipping Microsoft Office installation.
+)
+
 set /p updateChoice=Do you want to check for updates with winget? (Y/N):
 if /I "%updateChoice%"=="Y" (
     where winget >nul 2>&1
@@ -540,90 +541,6 @@ if /I "%updateChoice%"=="Y" (
 ) else (
     echo [INFO] Skipping winget update.
 )
-
-::=================================================
-:: File Associations (Manual Registry Method)
-::=================================================
-:: Adobe Acrobat for PDFs
-echo [INFO] Setting default apps for PDF...
-
-set "adobePath=C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe"
-set "progId=AcroExch.Document"
-
-if not exist "%adobePath%" (
-    echo [ERROR] Adobe Reader not found at: %adobePath%
-    pause
-    exit /b
-)
-
-reg add "HKCU\Software\Classes\.pdf" /ve /d "%progId%" /f
-reg add "HKCU\Software\Classes\%progId%\shell\open\command" /ve /d "\"%adobePath%\" \"%%1\"" /f
-reg add "HKCU\Software\Classes\%progId%\DefaultIcon" /ve /d "\"%adobePath%\",1" /f
-echo [OK] Default app for PDF set to Adobe Acrobat.
-timeout /t 5 /nobreak >nul
-
-
-:: Outlook for MAILTO and .MSG
-echo [INFO] Setting Outlook as default for MAILTO and MSG files...
-
-set "outlookPath=C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
-
-if not exist "%outlookPath%" (
-    echo [ERROR] Outlook not found at: %outlookPath%
-    pause
-    exit /b
-)
-
-:: MAILTO
-reg add "HKCU\Software\Classes\mailto" /ve /d "Outlook.URL.mailto.15" /f
-reg add "HKCU\Software\Classes\mailto\shell\open\command" /ve /d "\"%outlookPath%\" /c ipm.note /m \"%%1\"" /f
-
-:: .MSG
-reg add "HKCU\Software\Classes\.msg" /ve /d "Outlook.File.msg" /f
-reg add "HKCU\Software\Classes\Outlook.File.msg\shell\open\command" /ve /d "\"%outlookPath%\" \"%%1\"" /f
-reg add "HKCU\Software\Classes\Outlook.File.msg\DefaultIcon" /ve /d "\"%outlookPath%\",1" /f
-
-echo [OK] Registry entries for default apps have been set.
-echo [INFO] You may need to log off/log back in for changes to take effect.
-timeout /t 5 /nobreak >nul
-
-
-::=================================================
-:: Enforce File Type Associations with SetUserFTA
-::=================================================
-echo [INFO] Enforcing file type associations with SetUserFTA...
-:: Ensure SetUserFTA.exe exists in C:\_install; download from GitHub raw if missing
-if not exist "C:\_install\SetUserFTA.exe" (
-    echo [INFO] SetUserFTA.exe not found locally -- attempting download...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/CS-Colin/Odyssey/refs/heads/master/Dependencies/SetUserFTA.exe' -OutFile 'C:\_install\SetUserFTA.exe' -UseBasicParsing; exit 0 } catch { exit 1 }"
-    if not exist "C:\_install\SetUserFTA.exe" (
-        echo [WARN] Could not download SetUserFTA.exe; SetUserFTA steps may fail.
-    ) else (
-        echo [OK] SetUserFTA.exe downloaded.
-    )
-)
-
-:: Adobe Acrobat
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .pdf AcroExch.Document.DC"
-
-:: Outlook
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .msg Outlook.File.msg"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe mailto Outlook.URL.mailto.15"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .eml Outlook.File.eml"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .emlx Outlook.File.emlx"
-
-:: Chrome
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .http Google.Chrome"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .https Google.Chrome"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .url Google.Chrome"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .htm ChromeHTML"
-powershell -NoProfile -Command "C:\_install\SetUserFTA.exe .html ChromeHTML"
-
-echo [OK] File type associations have been set.
-echo [INFO] You may need to log off/log back in for changes to take effect.
-echo [NOTE] For enforcement issues, consult SetUserFTA documentation.
-timeout /t 5 /nobreak >nul
-
 
 ::=================================================
 :: Set Time Zone to South Africa Standard Time (SAST)
