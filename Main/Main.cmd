@@ -78,9 +78,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://christitus.c
 echo [OK] Chris Titus debloat script executed. Please review the output for any errors.
 
 
-if "%choice%"=="0" exit /b
-goto MENU
-
 :HOTFIXES_MENU
 cls
 echo:            ______________________________________________________
