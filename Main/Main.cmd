@@ -57,7 +57,7 @@ echo:                           [0] Go to Main Menu
 echo:            ______________________________________________________
 echo:
 echo.
-echo Enter your choice [0-10]:
+echo Enter your choice [0-2]:
 set /p debloat_choice=
 if "%debloat_choice%"=="1" goto DEBLOAT_WINDOWS
 if "%debloat_choice%"=="2" goto CHRIS_TITUS_DEBLOAT
