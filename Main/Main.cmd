@@ -12,13 +12,18 @@ if %errorlevel% NEQ 0 (
 
 FOR /F "tokens=*" %%A IN ('powershell -NoProfile -ExecutionPolicy Bypass -Command "winget --version 2>$null"') DO SET "VER=%%A"
 
+echo [INFO] Checking for winget...
+
 if "%VER%"=="" (
-    echo [X] winget NOT installed
+    echo [ERR] winget NOT installed
+    timeout /t 2 /nobreak >nul
     echo [INFO] Will attempt to install...
+    timeout /t 2 /nobreak >nul
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://aka.ms/getwinget -OutFile getwinget.ps1; .\getwinget.ps1; Remove-Item getwinget.ps1"
 ) else (
-    echo [OK] winget version: %VER%
+    echo [OK] Winget current version: %VER%
     echo.
+    timeout /t 3 /nobreak >nul
     echo Checking for updates to winget...
     powershell -NoProfile -ExecutionPolicy Bypass -Command "winget upgrade --id Microsoft.AppInstaller"
 )
