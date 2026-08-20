@@ -958,10 +958,27 @@ if %errorlevel%==0 (
     echo [INFO] Usoclient not found. Manual check may be required.
 )
 
+echo [INFO] Windows Update process started.
+
+::Make new user an administrator
+
+echo [INFO] Creating new user account...
+echo [NOTE] Please enter the name of the new user when prompted. You will also be asked if this user should have Administrator privileges. (THIS IS MANDATORY)
+
+set /p newuser=Enter new username:
+net user %newuser% /add
+set /p usertype=Should this user be an Administrator? (Y/N): 
+
+if /i "%usertype%"=="Y" (
+    net localgroup administrators %newuser% /add
+    echo [OK] User %newuser% created and added to Administrators.
+) else (
+    echo [OK] Standard user %newuser% created.
+)
+
 :: Open Windows Update settings
 start ms-settings:windowsupdate
 
-echo [INFO] Windows Update process started.
 
 ::=================================================
 :: Set Computer Name
