@@ -52,12 +52,12 @@ echo.
 echo Enter your choice [0-4]:
 set /p choice= 
 
+if "%choice%"=="0" exit 
 if "%choice%"=="1" goto STARTMAIN
 if "%choice%"=="2" goto ADMIN_MENU
 if "%choice%"=="3" goto UTILS_MENU
 if "%choice%"=="4" goto HOTFIXES_MENU
 if "%choice%"=="5" goto DEBLOATER_MENU
-if "%choice%"=="0" exit /b
 
 
 :DEBLOATER_MENU
