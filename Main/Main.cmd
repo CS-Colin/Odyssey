@@ -489,12 +489,24 @@ pause
 goto MENU
 
 :CREATE_USER
-set /p newuser=Enter new username:
-net user %newuser% /add
+set /p "newuser=Enter the user's full name (for example, John Smith): "
+if not defined newuser (
+    echo [ERROR] A username is required.
+    pause
+    goto ADMIN_MENU
+)
+echo.
+echo [NOTE] Set a password for this user when prompted. Your password will not be displayed.
+net user "%newuser%" * /add
+if errorlevel 1 (
+    echo [ERROR] The user could not be created. Check the name and try again.
+    pause
+    goto ADMIN_MENU
+)
 set /p usertype=Should this user be an Administrator? (Y/N): 
 
 if /i "%usertype%"=="Y" (
-    net localgroup administrators %newuser% /add
+    net localgroup administrators "%newuser%" /add
     echo [OK] User %newuser% created and added to Administrators.
 ) else (
     echo [OK] Standard user %newuser% created.
@@ -926,6 +938,60 @@ start explorer.exe
 
 echo [OK] Taskbar tweaks applied successfully.
 
+::=================================================
+:: Set Computer Name
+::=================================================
+:: Prompt for the new PC name
+set /p NewName=Enter the new PC name: 
+
+:: Show current name
+for /f %%i in ('hostname') do set CurrentName=%%i
+
+echo.
+echo Current PC Name: %CurrentName%
+echo New PC Name: %NewName%
+
+:: Confirm
+set /p confirm=Do you want to rename the PC to "%NewName%" (Y/N): 
+if /i "%confirm%"=="Y" (
+    echo Rename command issued. Restarting...
+    powershell -Command "Rename-Computer -NewName '%NewName%'"
+    exit /b
+)
+if /i "%confirm%"=="N" (
+    echo Cancelled by user.
+    pause
+)
+goto MENU
+
+::Make new user an administrator
+
+echo [INFO] Creating new user account...
+echo [NOTE] Please enter the name of the new user when prompted. You will also be asked if this user should have Administrator privileges. (THIS IS MANDATORY)
+
+set /p "newuser=Enter the user's full name (for example, John Smith): "
+if not defined newuser (
+    echo [ERROR] A username is required.
+    pause
+    goto MENU
+)
+echo.
+echo [NOTE] Set a password for this user when prompted. Your password will not be displayed.
+net user "%newuser%" * /add
+if errorlevel 1 (
+    echo [ERROR] The user could not be created. Check the name and try again.
+    pause
+    goto MENU
+)
+set /p usertype=Should this user be an Administrator? (Y/N): 
+
+if /i "%usertype%"=="Y" (
+    net localgroup administrators "%newuser%" /add
+    echo [OK] User %newuser% created and added to Administrators.
+) else (
+    echo [OK] Standard user %newuser% created.
+)
+
 
 ::=================================================
 :: Open Windows Update Settings, Start Windows Update service
@@ -960,48 +1026,5 @@ if %errorlevel%==0 (
 
 echo [INFO] Windows Update process started.
 
-::Make new user an administrator
-
-echo [INFO] Creating new user account...
-echo [NOTE] Please enter the name of the new user when prompted. You will also be asked if this user should have Administrator privileges. (THIS IS MANDATORY)
-
-set /p newuser=Enter new username:
-net user %newuser% /add
-set /p usertype=Should this user be an Administrator? (Y/N): 
-
-if /i "%usertype%"=="Y" (
-    net localgroup administrators %newuser% /add
-    echo [OK] User %newuser% created and added to Administrators.
-) else (
-    echo [OK] Standard user %newuser% created.
-)
-
 :: Open Windows Update settings
 start ms-settings:windowsupdate
-
-
-::=================================================
-:: Set Computer Name
-::=================================================
-:: Prompt for the new PC name
-set /p NewName=Enter the new PC name: 
-
-:: Show current name
-for /f %%i in ('hostname') do set CurrentName=%%i
-
-echo.
-echo Current PC Name: %CurrentName%
-echo New PC Name: %NewName%
-
-:: Confirm
-set /p confirm=Do you want to rename the PC to "%NewName%" and restart? (Y/N): 
-if /i "%confirm%"=="Y" (
-    echo Rename command issued. Restarting...
-    powershell -Command "Rename-Computer -NewName '%NewName%' -Force -Restart"
-    exit /b
-)
-if /i "%confirm%"=="N" (
-    echo Cancelled by user.
-    pause
-)
-goto MENU
