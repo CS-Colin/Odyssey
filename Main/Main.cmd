@@ -954,7 +954,7 @@ echo New PC Name: %NewName%
 :: Confirm
 set /p confirm=Do you want to rename the PC to "%NewName%" (Y/N): 
 if /i "%confirm%"=="Y" (
-    echo Rename command issued. Restarting...
+    echo [INFO] Rename command issued. Will require a restart to take effect.
     powershell -Command "Rename-Computer -NewName '%NewName%'"
     exit /b
 )
@@ -1028,3 +1028,8 @@ echo [INFO] Windows Update process started.
 
 :: Open Windows Update settings
 start ms-settings:windowsupdate
+
+echo [DONE] The setup script has completed. Please check Windows Update for any pending updates and install them as necessary.
+echo [INFO] You may need to reboot for some changes to take effect.
+pause
+goto MENU
