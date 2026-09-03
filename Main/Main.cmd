@@ -2,6 +2,25 @@
 setlocal EnableDelayedExpansion
 title Odyssey V1 PRE ALPHA - 2025 Edition
 
+:: Runtime configuration, logging, and setup state
+set "ODYSSEY_VERSION=1.1"
+set "DRY_RUN=0"
+set "REBOOT_REQUIRED=0"
+set "SUCCESS_COUNT=0"
+set "FAIL_COUNT=0"
+set "SKIP_COUNT=0"
+set "RESUME_MODE=0"
+set "LOG_DIR=C:\_install\Logs"
+set "CONFIG_FILE=%~dp0Odyssey.conf"
+if /i "%~1"=="/resume" set "RESUME_MODE=1"
+if not exist "C:\_install" mkdir "C:\_install" >nul 2>&1
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%" >nul 2>&1
+for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "RUN_ID=%%I"
+set "LOG_FILE=%LOG_DIR%\Odyssey-%RUN_ID%.log"
+if exist "%CONFIG_FILE%" for /f "usebackq tokens=1,* delims==" %%A in ("%CONFIG_FILE%") do if not "%%A"=="" if not "%%A:~0,1"=="#" set "%%A=%%B"
+call :LOG INFO "Odyssey %ODYSSEY_VERSION% started."
+if "%RESUME_MODE%"=="1" call :LOG INFO "Resuming after restart."
+
 :: Check for Administrator Privileges
 >nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
 if %errorlevel% NEQ 0 (
@@ -28,6 +47,7 @@ if "%VER%"=="" (
     powershell -NoProfile -ExecutionPolicy Bypass -Command "winget upgrade --id Microsoft.AppInstaller"
 )
 timeout /t 5 /nobreak >nul
+if "%RESUME_MODE%"=="1" goto RESUME_AFTER_RESTART
 
 :MENU
 cls
@@ -43,13 +63,14 @@ echo:                           [2] Administration Menu
 echo:                           [3] Utilities Menu
 echo:                           [4] Windows Hot Fixes Menu
 echo:                           [5] Windows Debloater Menu
+echo:                           [6] Deployment Tools
 echo:                 ______________________________________________      
 echo:                                                                         
 echo:                           [0] Go to Main Menu
 echo:            ______________________________________________________
 echo:
 echo.
-echo Enter your choice [0-4]:
+echo Enter your choice [0-6]:
 set /p choice= 
 
 if "%choice%"=="0" exit 
@@ -58,7 +79,10 @@ if "%choice%"=="2" goto ADMIN_MENU
 if "%choice%"=="3" goto UTILS_MENU
 if "%choice%"=="4" goto HOTFIXES_MENU
 if "%choice%"=="5" goto DEBLOATER_MENU
-
+if "%choice%"=="6" goto DEPLOYMENT_TOOLS
+echo [ERROR] Invalid choice. Please try again.
+pause
+goto MENU
 
 :DEBLOATER_MENU
 cls
@@ -88,14 +112,24 @@ pause
 goto DEBLOATER_MENU
 
 :DEBLOAT_WINDOWS
+set /p "confirm=This runs a third-party debloat script. Continue? (Y/N): "
+if /i not "%confirm%"=="Y" goto DEBLOATER_MENU
+call :CREATE_RESTORE_POINT
 echo [INFO] Starting Windows Debloater...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://git.io/debloat | iex"
-echo [OK] Debloat script executed. Please review the output for any errors.
+if errorlevel 1 (echo [ERROR] Debloat script failed.& call :RESULT FAIL) else (echo [OK] Debloat script executed.& call :RESULT OK)
+pause
+goto DEBLOATER_MENU
 
 :CHRIS_TITUS_DEBLOAT
+set /p "confirm=This runs a third-party utility from the Internet. Continue? (Y/N): "
+if /i not "%confirm%"=="Y" goto DEBLOATER_MENU
+call :CREATE_RESTORE_POINT
 echo [INFO] Starting Chris Titus Windows Debloater...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://christitus.com/win | iex"
-echo [OK] Chris Titus debloat script executed. Please review the output for any errors.
+if errorlevel 1 (echo [ERROR] Chris Titus script failed.& call :RESULT FAIL) else (echo [OK] Chris Titus debloat script executed.& call :RESULT OK)
+pause
+goto DEBLOATER_MENU
 
 
 :HOTFIXES_MENU
@@ -368,15 +402,23 @@ pause
 goto ADMIN_MENU
 
 :RENAME_PC
-set /p NewName=Enter the new PC name:
+set "NewName="
+set /p "NewName=Enter the new PC name: "
+echo(%NewName%| findstr /r /x "[A-Za-z0-9][A-Za-z0-9-]*" >nul
+if errorlevel 1 (
+    echo [ERROR] Use only letters, numbers, and hyphens.
+    pause
+    goto ADMIN_MENU
+)
 echo Renaming PC to %NewName%...
-powershell -Command "Rename-Computer -NewName '%NewName%' -Force -Restart"
+powershell -NoProfile -Command "Rename-Computer -NewName '%NewName%' -Force"
+if errorlevel 1 (echo [ERROR] Computer rename failed.& call :RESULT FAIL) else (echo [OK] Rename scheduled.& set "REBOOT_REQUIRED=1"& call :RESULT OK)
 pause
 goto ADMIN_MENU
 
 :SET_ADMIN_PASS
 set /p adminuser=Enter admin username:
-net user %adminuser% *
+net user "%adminuser%" *
 pause
 goto ADMIN_MENU
 
@@ -384,10 +426,11 @@ goto ADMIN_MENU
 set /p domain=Enter domain name (or leave blank for workgroup):
 if "%domain%"=="" (
     set /p workgroup=Enter workgroup name:
-    netdom join %COMPUTERNAME% /domain:%workgroup%
+    powershell -NoProfile -Command "Add-Computer -WorkGroupName '!workgroup!'"
 ) else (
-    netdom join %COMPUTERNAME% /domain:%domain%
+    powershell -NoProfile -Command "Add-Computer -DomainName '%domain%' -Credential (Get-Credential)"
 )
+if errorlevel 1 (echo [ERROR] Domain or workgroup change failed.& call :RESULT FAIL) else (set "REBOOT_REQUIRED=1"& call :RESULT OK)
 pause
 goto ADMIN_MENU
 
@@ -537,6 +580,21 @@ goto MENU
 echo [INFO] Starting Main Setup...
 timeout /t 5 /nobreak >nul
 
+call :PREFLIGHT
+if errorlevel 1 (
+    pause
+    goto MENU
+)
+set /p "dryChoice=Preview only without making changes? (Y/N): "
+if /i "%dryChoice%"=="Y" set "DRY_RUN=1"
+if "%DRY_RUN%"=="1" (
+    echo [DRY RUN] Would remove configured bloatware, import applications, apply registry and taskbar settings, create shortcuts, prompt for a PC name and user, and start Windows Update.
+    call :LOG INFO "Dry run completed; no setup changes were made."
+    set /a SKIP_COUNT+=1
+    goto SETUP_SUMMARY
+)
+call :CREATE_RESTORE_POINT
+
 ::=================================================
 :: Check for Administrator Privileges
 ::=================================================
@@ -590,10 +648,18 @@ echo [OK] Import complete.
 
 set /p installoffice=Would you like to install Microsoft Office? (Y/N):
 if /I "%installoffice%"=="Y" (
-    echo [INFO] Installing Microsoft Office via winget...
-    powershell -NoProfile -Command "winget install --id Microsoft.Office -e --accept-source-agreements --accept-package-agreements"
+    winget list --id Microsoft.Office -e >nul 2>&1
+    if not errorlevel 1 (
+        echo [SKIP] Microsoft Office is already installed.
+        call :RESULT SKIP
+    ) else (
+        echo [INFO] Installing Microsoft Office via winget...
+        powershell -NoProfile -Command "winget install --id Microsoft.Office -e --accept-source-agreements --accept-package-agreements"
+        if errorlevel 1 (call :RESULT FAIL) else (call :RESULT OK)
+    )
 ) else (
     echo [INFO] Skipping Microsoft Office installation.
+    call :RESULT SKIP
 )
 
 set /p updateChoice=Do you want to check for updates with winget? (Y/N):
@@ -945,7 +1011,8 @@ echo [OK] Taskbar tweaks applied successfully.
 :: Set Computer Name
 ::=================================================
 :: Prompt for the new PC name
-set /p NewName=Enter the new PC name: 
+set "NewName="
+set /p "NewName=Enter the new PC name (leave blank to keep current name): "
 
 :: Show current name
 for /f %%i in ('hostname') do set CurrentName=%%i
@@ -955,18 +1022,35 @@ echo Current PC Name: %CurrentName%
 echo New PC Name: %NewName%
 
 :: Confirm
+if not defined NewName (
+    echo [SKIP] Computer rename skipped.
+    call :RESULT SKIP
+    goto AFTER_MAIN_RENAME
+)
+echo(%NewName%| findstr /r /x "[A-Za-z0-9][A-Za-z0-9-]*" >nul
+if errorlevel 1 (
+    echo [ERROR] PC names may contain only letters, numbers, and hyphens.
+    call :RESULT FAIL
+    goto AFTER_MAIN_RENAME
+)
 set /p confirm=Do you want to rename the PC to "%NewName%" (Y/N): 
 if /i "%confirm%"=="Y" (
     echo [INFO] Rename command issued. Will require a restart to take effect.
-    powershell -Command "Rename-Computer -NewName '%NewName%'"
-    pause
-    goto MENU
+    powershell -NoProfile -Command "Rename-Computer -NewName '%NewName%'"
+    if errorlevel 1 (
+        echo [ERROR] Computer rename failed.
+        call :RESULT FAIL
+    ) else (
+        set "REBOOT_REQUIRED=1"
+        call :RESULT OK
+        call :REGISTER_RESUME
+    )
 )
 if /i "%confirm%"=="N" (
     echo Cancelled by user.
-    pause
+    call :RESULT SKIP
 )
-goto MENU
+:AFTER_MAIN_RENAME
 
 ::Make new user an administrator
 
@@ -1035,5 +1119,176 @@ start ms-settings:windowsupdate
 
 echo [DONE] The setup script has completed. Please check Windows Update for any pending updates and install them as necessary.
 echo [INFO] You may need to reboot for some changes to take effect.
+goto SETUP_SUMMARY
+
+::=================================================
+:: Deployment, backup, diagnostic, and helper tools
+::=================================================
+:DEPLOYMENT_TOOLS
+cls
+echo:                        ============================
+echo:                            Deployment Tools
+echo:                        ============================
+echo:
+echo:              [1] Backup Wi-Fi, printers, and browser bookmarks
+echo:              [2] Create a system restore point
+echo:              [3] Check drivers, firmware, and Windows Update
+echo:              [4] Run Internet and system compatibility checks
+echo:              [5] Create or view Odyssey configuration
+echo:              [6] View current session summary
+echo:              [0] Go to Main Menu
+echo:
+set /p "deploy_choice=Enter your choice [0-6]: "
+if "%deploy_choice%"=="1" goto DEPLOYMENT_BACKUP
+if "%deploy_choice%"=="2" goto DEPLOYMENT_RESTORE
+if "%deploy_choice%"=="3" goto DEPLOYMENT_UPDATES
+if "%deploy_choice%"=="4" goto DEPLOYMENT_CHECKS
+if "%deploy_choice%"=="5" goto DEPLOYMENT_CONFIG
+if "%deploy_choice%"=="6" goto SETUP_SUMMARY
+if "%deploy_choice%"=="0" goto MENU
+echo [ERROR] Invalid choice.
+pause
+goto DEPLOYMENT_TOOLS
+
+:DEPLOYMENT_BACKUP
+echo [NOTE] The Wi-Fi backup contains readable wireless passwords. Store it securely.
+set /p "confirm=Continue with the backup? (Y/N): "
+if /i not "%confirm%"=="Y" goto DEPLOYMENT_TOOLS
+set "BACKUP_ROOT=%USERPROFILE%\Desktop\Odyssey-Backup-%RUN_ID%"
+mkdir "%BACKUP_ROOT%\WiFi" >nul 2>&1
+mkdir "%BACKUP_ROOT%\Bookmarks" >nul 2>&1
+echo [INFO] Exporting Wi-Fi profiles...
+netsh wlan export profile key=clear folder="%BACKUP_ROOT%\WiFi" >nul 2>&1
+echo [INFO] Exporting printers...
+if exist "%WINDIR%\System32\spool\tools\PrintBrm.exe" "%WINDIR%\System32\spool\tools\PrintBrm.exe" -b -f "%BACKUP_ROOT%\Printers.printerExport" >nul 2>&1
+if exist "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks" copy /y "%LOCALAPPDATA%\Google\Chrome\User Data\Default\Bookmarks" "%BACKUP_ROOT%\Bookmarks\Chrome-Bookmarks" >nul
+if exist "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Bookmarks" copy /y "%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Bookmarks" "%BACKUP_ROOT%\Bookmarks\Edge-Bookmarks" >nul
+if exist "%APPDATA%\Mozilla\Firefox\Profiles" xcopy "%APPDATA%\Mozilla\Firefox\Profiles" "%BACKUP_ROOT%\Bookmarks\Firefox-Profiles" /e /i /y >nul
+echo [OK] Backup saved to %BACKUP_ROOT%
+call :LOG INFO "Deployment backup saved to %BACKUP_ROOT%."
+call :RESULT OK
+pause
+goto DEPLOYMENT_TOOLS
+
+:DEPLOYMENT_RESTORE
+call :CREATE_RESTORE_POINT
+pause
+goto DEPLOYMENT_TOOLS
+
+:DEPLOYMENT_UPDATES
+echo [INFO] Scanning Plug and Play devices...
+pnputil /scan-devices
+echo [INFO] Installed firmware devices:
+powershell -NoProfile -Command "Get-PnpDevice -Class Firmware -ErrorAction SilentlyContinue | Format-Table Status,FriendlyName -AutoSize"
+echo [INFO] Triggering Windows Update scan and opening Optional Updates...
+usoclient StartScan >nul 2>&1
+start ms-settings:windowsupdate-optionalupdates
+call :LOG INFO "Driver, firmware, and Windows Update check started."
+call :RESULT OK
+pause
+goto DEPLOYMENT_TOOLS
+
+:DEPLOYMENT_CHECKS
+call :PREFLIGHT
+if errorlevel 1 (call :RESULT FAIL) else (call :RESULT OK)
+pause
+goto DEPLOYMENT_TOOLS
+
+:DEPLOYMENT_CONFIG
+if not exist "%CONFIG_FILE%" (
+    >"%CONFIG_FILE%" echo # Odyssey configuration - use NAME=VALUE
+    >>"%CONFIG_FILE%" echo DRY_RUN=0
+    >>"%CONFIG_FILE%" echo CREATE_RESTORE_POINT=1
+    echo [OK] Configuration created at %CONFIG_FILE%
+) else (
+    echo [INFO] Current configuration:
+    type "%CONFIG_FILE%"
+)
+pause
+goto DEPLOYMENT_TOOLS
+
+:SETUP_SUMMARY
+echo.
+echo ================================================================
+echo                         SESSION SUMMARY
+echo ================================================================
+echo Successful: %SUCCESS_COUNT%
+echo Failed:     %FAIL_COUNT%
+echo Skipped:    %SKIP_COUNT%
+echo Log file:   %LOG_FILE%
+if "%REBOOT_REQUIRED%"=="1" (
+    echo Restart required: YES
+    set /p "restartChoice=Restart now? (Y/N): "
+    if /i "!restartChoice!"=="Y" shutdown /r /t 0
+) else (
+    echo Restart required: NO
+)
 pause
 goto MENU
+
+:RESUME_AFTER_RESTART
+reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v OdysseyResume /f >nul 2>&1
+echo [OK] Odyssey resumed after the restart.
+echo [INFO] The previous setup run completed before restarting. Review Windows Update and the latest log in %LOG_DIR%.
+call :LOG INFO "Post-restart resume completed."
+pause
+goto MENU
+
+:PREFLIGHT
+echo [INFO] Running preflight checks...
+powershell -NoProfile -Command "if ([Environment]::OSVersion.Version.Major -lt 10) { exit 1 }"
+if errorlevel 1 (
+    echo [ERROR] Windows 10 or Windows 11 is required.
+    call :LOG ERROR "Unsupported Windows version."
+    exit /b 1
+)
+powershell -NoProfile -Command "try { $null=Invoke-WebRequest -Uri 'https://www.microsoft.com' -Method Head -TimeoutSec 8 -UseBasicParsing; exit 0 } catch { exit 1 }"
+if errorlevel 1 (
+    echo [ERROR] No working Internet connection was detected.
+    call :LOG ERROR "Internet connectivity check failed."
+    exit /b 1
+)
+where winget >nul 2>&1
+if errorlevel 1 echo [WARN] winget is unavailable; application steps may be skipped.
+echo [OK] Preflight checks passed.
+call :LOG INFO "Preflight checks passed."
+exit /b 0
+
+:CREATE_RESTORE_POINT
+if /i "%CREATE_RESTORE_POINT%"=="0" (
+    echo [SKIP] Restore-point creation disabled by configuration.
+    call :RESULT SKIP
+    exit /b 0
+)
+echo [INFO] Creating a system restore point...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Enable-ComputerRestore -Drive $env:SystemDrive -ErrorAction SilentlyContinue; Checkpoint-Computer -Description 'Odyssey before changes' -RestorePointType MODIFY_SETTINGS -ErrorAction Stop; exit 0 } catch { exit 1 }"
+if errorlevel 1 (
+    echo [WARN] Restore point could not be created. System Protection may be disabled or Windows may be rate-limiting restore points.
+    call :LOG WARN "Restore point creation failed."
+    call :RESULT FAIL
+) else (
+    echo [OK] Restore point created.
+    call :LOG INFO "Restore point created."
+    call :RESULT OK
+)
+exit /b 0
+
+:REGISTER_RESUME
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v OdysseyResume /t REG_SZ /d "\"%~f0\" /resume" /f >nul 2>&1
+if errorlevel 1 (
+    call :LOG WARN "Could not register restart resume."
+) else (
+    call :LOG INFO "Restart resume registered."
+)
+exit /b
+
+:RESULT
+if /i "%~1"=="OK" set /a SUCCESS_COUNT+=1
+if /i "%~1"=="FAIL" set /a FAIL_COUNT+=1
+if /i "%~1"=="SKIP" set /a SKIP_COUNT+=1
+call :LOG INFO "Result recorded: %~1"
+exit /b
+
+:LOG
+>>"%LOG_FILE%" echo [%date% %time%] [%~1] %~2
+exit /b
