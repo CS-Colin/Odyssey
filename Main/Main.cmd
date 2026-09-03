@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
-title Odyssey V1 ALPHA - 2025 Edition
+title Odyssey V1 PRE ALPHA - 2025 Edition
 
 :: Runtime configuration, logging, and setup state
 set "ODYSSEY_VERSION=1.1"
@@ -715,15 +715,24 @@ if errorlevel 1 (
 )
 set "dryChoice="
 set /p "dryChoice=Preview only without making changes? (Y/N): "
+if /i "!dryChoice!"=="Y" goto STARTMAIN_DRY_RUN
+if "!DRY_RUN!"=="1" goto STARTMAIN_DRY_RUN
+goto STARTMAIN_LIVE
 if /i "%dryChoice%"=="Y" set "DRY_RUN=1"
 if "%DRY_RUN%"=="1" (
-if /i "!dryChoice!"=="Y" set "DRY_RUN=1"
-if "!DRY_RUN!"=="1" (
     echo [DRY RUN] Would remove configured bloatware, import applications, apply registry and taskbar settings, create shortcuts, prompt for a PC name and user, and start Windows Update.
     call :LOG INFO "Dry run completed; no setup changes were made."
     set /a SKIP_COUNT+=1
     goto SETUP_SUMMARY
 )
+
+:STARTMAIN_DRY_RUN
+echo [DRY RUN] Would remove configured bloatware, import applications, apply registry and taskbar settings, create shortcuts, prompt for a PC name and user, and start Windows Update.
+call :LOG INFO "Dry run completed; no setup changes were made."
+set /a SKIP_COUNT+=1
+goto SETUP_SUMMARY
+
+:STARTMAIN_LIVE
 call :CREATE_RESTORE_POINT
 
 ::=================================================
