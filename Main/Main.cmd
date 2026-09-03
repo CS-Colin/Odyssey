@@ -913,13 +913,13 @@ if /i "%confirm%"=="Y" (
     powershell -NoProfile -Command "Rename-Computer -NewName '%NewName%'"
     if errorlevel 1 (echo [ERROR] Computer rename failed.) else (echo [OK] Computer renamed. Restart Windows to apply it.)
     pause
-    goto MENU
 )
 if /i "%confirm%"=="N" (
     echo Cancelled by user.
     pause
+    goto MENU
 )
-goto MENU
+
 
 ::Make new user an administrator
 
