@@ -840,6 +840,7 @@ reg query "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory >nul 2>&
 if %errorlevel%==0 (
     for /f "tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory 2^>nul') do set "clipboardHistory=%%b"
     if "%clipboardHistory%"=="0x1" (
+    if "!clipboardHistory!"=="0x1" (
         echo [OK] Clipboard History is already enabled.
     ) else (
         echo [INFO] Clipboard History is disabled. Enabling now...
@@ -908,6 +909,8 @@ powershell -ExecutionPolicy Bypass -Command ^
         }
     }
 }"
+:: Pin shortcuts to Start and Taskbar (best effort; Windows may block programmatic pinning)
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$apps=@('Word','Excel','Outlook','This PC','User Folder'); $shell=New-Object -ComObject Shell.Application; foreach($app in $apps){ $shortcut=Join-Path ([Environment]::GetFolderPath('Desktop')) ($app+'.lnk'); if(Test-Path -LiteralPath $shortcut){ $folder=$shell.Namespace((Split-Path -LiteralPath $shortcut)); $item=$folder.ParseName((Split-Path -Leaf $shortcut)); foreach($verb in $item.Verbs()){ if($verb.Name -match 'Pin to Start|Pin to taskbar'){ $verb.DoIt() } } } }"
 
 if %errorlevel% neq 0 (
     echo [ERROR] Pinning may have failed or was partially successful.
@@ -915,6 +918,14 @@ if %errorlevel% neq 0 (
     exit /b 1
 ) else (
     echo [OK] Shortcuts created. Pinning attempt completed.
+)
+if %errorlevel% neq 0 (
+    echo [WARN] Shortcut pinning was unavailable. Setup will continue.
+    call :LOG WARN "Shortcut pinning was unavailable or partially successful."
+    call :RESULT SKIP
+) else (
+    echo [OK] Shortcuts created. Pinning attempt completed.
+    call :RESULT OK
 )
 
 pause
