@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
-title Odyssey V1 PRE ALPHA - 2025 Edition
+title Odyssey V1 ALPHA - 2025 Edition
 
 :: Runtime configuration, logging, and setup state
 set "ODYSSEY_VERSION=1.1"
