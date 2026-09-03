@@ -852,6 +852,7 @@ if %errorlevel% neq 0 (
 )
 
 pause
+goto AFTER_SHORTCUT_FUNCTIONS
 
 
 ::=================================================
@@ -867,7 +868,7 @@ powershell -ExecutionPolicy Bypass -Command ^
  $Shortcut = $WshShell.CreateShortcut(\"$desktop\\%shortcutName%.lnk\"); ^
  $Shortcut.TargetPath = \"%targetPath%\"; ^
  $Shortcut.Save()"
- 
+exit /b
 
 ::=================================================
 :: Function: CreateShortcutWithArgs
@@ -884,7 +885,9 @@ powershell -ExecutionPolicy Bypass -Command ^
  $Shortcut.TargetPath = \"%targetPath%\"; ^
  $Shortcut.Arguments = \"%arguments%\"; ^
  $Shortcut.Save()"
+exit /b
 
+:AFTER_SHORTCUT_FUNCTIONS
 
 ::=========================================
 :: Check if OS is Windows 11 (required for Widgets, etc.)
@@ -956,7 +959,8 @@ set /p confirm=Do you want to rename the PC to "%NewName%" (Y/N):
 if /i "%confirm%"=="Y" (
     echo [INFO] Rename command issued. Will require a restart to take effect.
     powershell -Command "Rename-Computer -NewName '%NewName%'"
-    exit /b
+    pause
+    goto MENU
 )
 if /i "%confirm%"=="N" (
     echo Cancelled by user.
