@@ -18,12 +18,15 @@ if not exist "%LOG_DIR%" mkdir "%LOG_DIR%" >nul 2>&1
 for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "RUN_ID=%%I"
 set "LOG_FILE=%LOG_DIR%\Odyssey-%RUN_ID%.log"
 if exist "%CONFIG_FILE%" for /f "usebackq tokens=1,* delims==" %%A in ("%CONFIG_FILE%") do if not "%%A"=="" if not "%%A:~0,1"=="#" set "%%A=%%B"
+if exist "%CONFIG_FILE%" for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%CONFIG_FILE%") do if not "%%A"=="" set "%%A=%%B"
 call :LOG INFO "Odyssey %ODYSSEY_VERSION% started."
 if "%RESUME_MODE%"=="1" call :LOG INFO "Resuming after restart."
 
 :: Check for Administrator Privileges
 >nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
 if %errorlevel% NEQ 0 (
+>nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
+if errorlevel 1 (
     echo [ERROR] Please run this script as Administrator.
     pause
     exit /b
@@ -39,6 +42,8 @@ if "%VER%"=="" (
     echo [INFO] Will attempt to install...
     timeout /t 2 /nobreak >nul
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://aka.ms/getwinget -OutFile getwinget.ps1; .\getwinget.ps1; Remove-Item getwinget.ps1"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $bundle=Join-Path $env:TEMP 'Microsoft.DesktopAppInstaller.msixbundle'; Invoke-WebRequest -Uri 'https://aka.ms/getwinget' -OutFile $bundle -UseBasicParsing; Add-AppxPackage -Path $bundle; Remove-Item -LiteralPath $bundle -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
+    if errorlevel 1 echo [WARN] Automatic Winget installation failed. Install App Installer from Microsoft Store.
 ) else (
     echo [OK] Winget current version: %VER%
     echo.
@@ -71,6 +76,7 @@ echo:            ______________________________________________________
 echo:
 echo.
 echo Enter your choice [0-6]:
+set "choice="
 set /p choice= 
 
 if "%choice%"=="0" exit 
@@ -80,6 +86,15 @@ if "%choice%"=="3" goto UTILS_MENU
 if "%choice%"=="4" goto HOTFIXES_MENU
 if "%choice%"=="5" goto DEBLOATER_MENU
 if "%choice%"=="6" goto DEPLOYMENT_TOOLS
+set /p choice= 
+
+if "!choice!"=="0" exit /b
+if "!choice!"=="1" goto STARTMAIN
+if "!choice!"=="2" goto ADMIN_MENU
+if "!choice!"=="3" goto UTILS_MENU
+if "!choice!"=="4" goto HOTFIXES_MENU
+if "!choice!"=="5" goto DEBLOATER_MENU
+if "!choice!"=="6" goto DEPLOYMENT_TOOLS
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto MENU
@@ -106,14 +121,22 @@ set /p debloat_choice=
 if "%debloat_choice%"=="1" goto DEBLOAT_WINDOWS
 if "%debloat_choice%"=="2" goto CHRIS_TITUS_DEBLOAT
 if "%debloat_choice%"=="0" goto MENU
+echo Enter your choice [0-2]:
+set "debloat_choice="
+set /p debloat_choice=
+if "!debloat_choice!"=="1" goto DEBLOAT_WINDOWS
+if "!debloat_choice!"=="2" goto CHRIS_TITUS_DEBLOAT
+if "!debloat_choice!"=="0" goto MENU
 
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto DEBLOATER_MENU
 
 :DEBLOAT_WINDOWS
+set "confirm="
 set /p "confirm=This runs a third-party debloat script. Continue? (Y/N): "
 if /i not "%confirm%"=="Y" goto DEBLOATER_MENU
+if /i not "!confirm!"=="Y" goto DEBLOATER_MENU
 call :CREATE_RESTORE_POINT
 echo [INFO] Starting Windows Debloater...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://git.io/debloat | iex"
@@ -122,8 +145,10 @@ pause
 goto DEBLOATER_MENU
 
 :CHRIS_TITUS_DEBLOAT
+set "confirm="
 set /p "confirm=This runs a third-party utility from the Internet. Continue? (Y/N): "
 if /i not "%confirm%"=="Y" goto DEBLOATER_MENU
+if /i not "!confirm!"=="Y" goto DEBLOATER_MENU
 call :CREATE_RESTORE_POINT
 echo [INFO] Starting Chris Titus Windows Debloater...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://christitus.com/win | iex"
@@ -154,6 +179,13 @@ set /p hotfix_choice=
 if "%hotfix_choice%"=="1" goto FIX_BITLOCKER
 if "%hotfix_choice%"=="2" goto DISABLE_UDP_RDP
 if "%hotfix_choice%"=="0" goto MENU
+echo Enter your choice [0-1]:
+set "hotfix_choice="
+set /p hotfix_choice=
+
+if "!hotfix_choice!"=="1" goto FIX_BITLOCKER
+if "!hotfix_choice!"=="2" goto DISABLE_UDP_RDP
+if "!hotfix_choice!"=="0" goto MENU
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto HOTFIXES_MENU
@@ -206,6 +238,9 @@ echo:
 echo.
 echo Enter your choice [0-14]:
 set /p admin_choice=
+echo Enter your choice [0-14]:
+set "admin_choice="
+set /p admin_choice=
 
 if "%admin_choice%"=="1" goto DISABLE_BITLOCKER
 if "%admin_choice%"=="2" goto CREATE_USER
@@ -222,6 +257,21 @@ if "%admin_choice%"=="12" goto UPDATE_HISTORY
 if "%admin_choice%"=="13" goto TOGGLE_UAC
 if "%admin_choice%"=="14" goto GPO_BACKUP
 if "%admin_choice%"=="0" goto MENU
+if "!admin_choice!"=="1" goto DISABLE_BITLOCKER
+if "!admin_choice!"=="2" goto CREATE_USER
+if "!admin_choice!"=="3" goto GAMCO
+if "!admin_choice!"=="4" goto ENABLE_BITLOCKER
+if "!admin_choice!"=="5" goto RENAME_PC
+if "!admin_choice!"=="6" goto SET_ADMIN_PASS
+if "!admin_choice!"=="7" goto JOIN_DOMAIN
+if "!admin_choice!"=="8" goto REMOTE_DESKTOP
+if "!admin_choice!"=="9" goto FIREWALL
+if "!admin_choice!"=="10" goto CLEAR_EVENT_LOGS
+if "!admin_choice!"=="11" goto MANAGE_SERVICES
+if "!admin_choice!"=="12" goto UPDATE_HISTORY
+if "!admin_choice!"=="13" goto TOGGLE_UAC
+if "!admin_choice!"=="14" goto GPO_BACKUP
+if "!admin_choice!"=="0" goto MENU
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto ADMIN_MENU
@@ -274,6 +324,25 @@ if "%utils_choice%"=="13" goto OPEN_DOCS
 if "%utils_choice%"=="14" goto ABOUT
 if "%utils_choice%"=="15" goto REBOOT_SHUTDOWN
 if "%utils_choice%"=="0" goto MENU
+echo Enter your choice [0-15]:
+set "utils_choice="
+set /p utils_choice=
+if "!utils_choice!"=="1" goto MASSGRAVE
+if "!utils_choice!"=="2" goto MASSGRAVEALT
+if "!utils_choice!"=="3" goto INFO
+if "!utils_choice!"=="4" goto DISK_CLEANUP
+if "!utils_choice!"=="5" goto WIN_UPDATES
+if "!utils_choice!"=="6" goto NET_TROUBLE
+if "!utils_choice!"=="7" goto DEVICE_MANAGER
+if "!utils_choice!"=="8" goto TASK_MANAGER
+if "!utils_choice!"=="9" goto CONTROL_PANEL
+if "!utils_choice!"=="10" goto BACKUP_USERDATA
+if "!utils_choice!"=="11" goto RESTORE_POINT
+if "!utils_choice!"=="12" goto SFC_DISM
+if "!utils_choice!"=="13" goto OPEN_DOCS
+if "!utils_choice!"=="14" goto ABOUT
+if "!utils_choice!"=="15" goto REBOOT_SHUTDOWN
+if "!utils_choice!"=="0" goto MENU
 echo [ERROR] Invalid choice. Please try again.
 pause
 goto UTILS_MENU
@@ -319,6 +388,25 @@ xcopy "%USERPROFILE%\Documents" "%backupdest%\Documents" /E /I /Y
 xcopy "%USERPROFILE%\Desktop" "%backupdest%\Desktop" /E /I /Y
 xcopy "%USERPROFILE%\Pictures" "%backupdest%\Pictures" /E /I /Y
 echo [OK] Backup complete.
+:BACKUP_USERDATA
+echo [INFO] Backing up user data (Documents, Desktop, Pictures)...
+set "backupdest="
+set /p "backupdest=Enter backup destination folder: "
+if not defined backupdest (
+    echo [ERROR] A backup destination is required.
+    pause
+    goto UTILS_MENU
+)
+if not exist "%backupdest%" mkdir "%backupdest%" >nul 2>&1
+if not exist "%backupdest%" (
+    echo [ERROR] The backup destination could not be created.
+    pause
+    goto UTILS_MENU
+)
+robocopy "%USERPROFILE%\Documents" "%backupdest%\Documents" /E /R:1 /W:1
+robocopy "%USERPROFILE%\Desktop" "%backupdest%\Desktop" /E /R:1 /W:1
+robocopy "%USERPROFILE%\Pictures" "%backupdest%\Pictures" /E /R:1 /W:1
+echo [OK] Backup finished. Review any Robocopy warnings above.
 pause
 goto UTILS_MENU
 
@@ -400,11 +488,28 @@ timeout /t 5 >nul
 goto BITLOCKER_ENCRYPT_PROGRESS
 pause
 goto ADMIN_MENU
+:BITLOCKER_ENCRYPT_PROGRESS
+set "progress="
+for /f %%a in ('powershell -NoProfile -Command "try { (Get-BitLockerVolume -MountPoint 'C:').EncryptionPercentage } catch { exit 1 }"') do set "progress=%%a"
+if not defined progress (
+    echo [WARN] Unable to read BitLocker progress.
+    pause
+    goto ADMIN_MENU
+)
+echo [PROGRESS] Encryption: !progress!%%
+if !progress! GEQ 100 (
+    echo [OK] BitLocker encryption completed.
+    pause
+    goto ADMIN_MENU
+)
+timeout /t 5 >nul
+goto BITLOCKER_ENCRYPT_PROGRESS
 
 :RENAME_PC
 set "NewName="
 set /p "NewName=Enter the new PC name: "
 echo(%NewName%| findstr /r /x "[A-Za-z0-9][A-Za-z0-9-]*" >nul
+echo(!NewName!| findstr /r /x "[A-Za-z0-9][A-Za-z0-9-]*" >nul
 if errorlevel 1 (
     echo [ERROR] Use only letters, numbers, and hyphens.
     pause
@@ -412,6 +517,8 @@ if errorlevel 1 (
 )
 echo Renaming PC to %NewName%...
 powershell -NoProfile -Command "Rename-Computer -NewName '%NewName%' -Force"
+echo Renaming PC to !NewName!...
+powershell -NoProfile -Command "Rename-Computer -NewName '!NewName!' -Force"
 if errorlevel 1 (echo [ERROR] Computer rename failed.& call :RESULT FAIL) else (echo [OK] Rename scheduled.& set "REBOOT_REQUIRED=1"& call :RESULT OK)
 pause
 goto ADMIN_MENU
@@ -507,6 +614,21 @@ manage-bde -status C: | find "Percentage" >nul
 if %errorlevel%==0 goto BITLOCKER_PROGRESS
 
 echo [OK] BitLocker decryption completed or not enabled.
+:BITLOCKER_PROGRESS
+set "progress="
+for /f %%a in ('powershell -NoProfile -Command "try { (Get-BitLockerVolume -MountPoint 'C:').EncryptionPercentage } catch { exit 1 }"') do set "progress=%%a"
+if not defined progress (
+    echo [WARN] Unable to read BitLocker progress.
+    pause
+    goto MENU
+)
+echo [PROGRESS] Decryption: !progress!%%
+if !progress! LEQ 0 goto BITLOCKER_DECRYPTED
+timeout /t 5 >nul
+goto BITLOCKER_PROGRESS
+
+:BITLOCKER_DECRYPTED
+echo [OK] BitLocker decryption completed or not enabled.
 pause
 goto MENU
 
@@ -517,6 +639,7 @@ if %errorlevel% neq 0 (
     echo [WARN] systeminfo failed. Trying MSINFO32...
     msinfo32 /report "%USERPROFILE%\Desktop\SystemInfo.txt"
     if %errorlevel% neq 0 (
+    if errorlevel 1 (
         echo [ERROR] Both systeminfo and msinfo32 failed to generate a report.
         pause
         goto MENU
@@ -533,6 +656,9 @@ goto MENU
 
 :CREATE_USER
 set /p "newuser=Enter the user's full name (for example, John Smith): "
+:CREATE_USER
+set "newuser="
+set /p "newuser=Enter the user's full name (for example, John Smith): "
 if not defined newuser (
     echo [ERROR] A username is required.
     pause
@@ -546,6 +672,8 @@ if errorlevel 1 (
     pause
     goto ADMIN_MENU
 )
+set "usertype="
+set /p usertype=Should this user be an Administrator? (Y/N): 
 set /p usertype=Should this user be an Administrator? (Y/N): 
 
 if /i "%usertype%"=="Y" (
@@ -585,9 +713,12 @@ if errorlevel 1 (
     pause
     goto MENU
 )
+set "dryChoice="
 set /p "dryChoice=Preview only without making changes? (Y/N): "
 if /i "%dryChoice%"=="Y" set "DRY_RUN=1"
 if "%DRY_RUN%"=="1" (
+if /i "!dryChoice!"=="Y" set "DRY_RUN=1"
+if "!DRY_RUN!"=="1" (
     echo [DRY RUN] Would remove configured bloatware, import applications, apply registry and taskbar settings, create shortcuts, prompt for a PC name and user, and start Windows Update.
     call :LOG INFO "Dry run completed; no setup changes were made."
     set /a SKIP_COUNT+=1
@@ -603,6 +734,11 @@ if %errorlevel% NEQ 0 (
     echo [ERROR] Please run this script as Administrator.
     pause
     exit /b
+>nul 2>&1 "%SystemRoot%\system32\cacls.exe" "%SystemRoot%\system32\config\system"
+if errorlevel 1 (
+    echo [ERROR] Please run this script as Administrator.
+    pause
+    goto MENU
 )
 
 ::=================================================
@@ -645,6 +781,14 @@ if not exist "C:\_install\installed-apps.json" (
 echo [INFO] Starting Winget import...
 powershell -NoProfile -Command "winget import -i 'C:\_install\installed-apps.json'"
 echo [OK] Import complete.
+echo [INFO] Starting Winget import...
+if exist "C:\_install\installed-apps.json" (
+    powershell -NoProfile -Command "winget import -i 'C:\_install\installed-apps.json' --accept-source-agreements --accept-package-agreements"
+    if errorlevel 1 (echo [WARN] Winget import completed with errors.& call :RESULT FAIL) else (echo [OK] Import complete.& call :RESULT OK)
+) else (
+    echo [SKIP] Winget import skipped because installed-apps.json is unavailable.
+    call :RESULT SKIP
+)
 
 set /p installoffice=Would you like to install Microsoft Office? (Y/N):
 if /I "%installoffice%"=="Y" (
@@ -666,6 +810,8 @@ set /p updateChoice=Do you want to check for updates with winget? (Y/N):
 if /I "%updateChoice%"=="Y" (
     where winget >nul 2>&1
     if %errorlevel%==0 (
+    where winget >nul 2>&1
+    if not errorlevel 1 (
         echo [INFO] Running winget update...
         powershell -NoProfile -ExecutionPolicy Bypass -Command "winget update --all --accept-source-agreements --accept-package-agreements"
     ) else (
@@ -838,6 +984,7 @@ echo [INFO] Checking for Clipboard History feature...
 
 reg query "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory >nul 2>&1
 if %errorlevel%==0 (
+    if not errorlevel 1 (
     for /f "tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Clipboard" /v EnableClipboardHistory 2^>nul') do set "clipboardHistory=%%b"
     if "%clipboardHistory%"=="0x1" (
     if "!clipboardHistory!"=="0x1" (
@@ -888,6 +1035,12 @@ set "userFolderArgs=%USERPROFILE%"
 call :CreateShortcut "Word" "!wordPath!"
 call :CreateShortcut "Excel" "!excelPath!"
 call :CreateShortcut "Outlook" "!outlookPath!"
+call :CreateShortcutWithArgs "This PC" "!thisPCPath!" "!thisPCArgs!"
+call :CreateShortcutWithArgs "User Folder" "!userFolderPath!" "!userFolderArgs!"
+:: Create shortcuts on desktop
+if exist "!wordPath!" (call :CreateShortcut "Word" "!wordPath!") else (echo [SKIP] Word is not installed.& call :RESULT SKIP)
+if exist "!excelPath!" (call :CreateShortcut "Excel" "!excelPath!") else (echo [SKIP] Excel is not installed.& call :RESULT SKIP)
+if exist "!outlookPath!" (call :CreateShortcut "Outlook" "!outlookPath!") else (echo [SKIP] Outlook is not installed.& call :RESULT SKIP)
 call :CreateShortcutWithArgs "This PC" "!thisPCPath!" "!thisPCArgs!"
 call :CreateShortcutWithArgs "User Folder" "!userFolderPath!" "!userFolderArgs!"
 
@@ -946,6 +1099,19 @@ powershell -ExecutionPolicy Bypass -Command ^
  $Shortcut.TargetPath = \"%targetPath%\"; ^
  $Shortcut.Save()"
 exit /b
+:CreateShortcut
+set "shortcutName=%~1"
+set "targetPath=%~2"
+echo [INFO] Creating %shortcutName% shortcut...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$desktop=[Environment]::GetFolderPath('Desktop'); $shortcut=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $desktop '%shortcutName%.lnk')); $shortcut.TargetPath='%targetPath%'; $shortcut.Save()"
+if errorlevel 1 (
+    echo [WARN] Could not create the %shortcutName% shortcut. Setup will continue.
+    call :LOG WARN "Could not create %shortcutName% shortcut."
+    call :RESULT SKIP
+) else (
+    call :RESULT OK
+)
+exit /b 0
 
 ::=================================================
 :: Function: CreateShortcutWithArgs
@@ -963,6 +1129,18 @@ powershell -ExecutionPolicy Bypass -Command ^
  $Shortcut.Arguments = \"%arguments%\"; ^
  $Shortcut.Save()"
 exit /b
+set "targetPath=%~2"
+set "arguments=%~3"
+echo [INFO] Creating %shortcutName% shortcut...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$desktop=[Environment]::GetFolderPath('Desktop'); $shortcut=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $desktop '%shortcutName%.lnk')); $shortcut.TargetPath='%targetPath%'; $shortcut.Arguments='%arguments%'; $shortcut.Save()"
+if errorlevel 1 (
+    echo [WARN] Could not create the %shortcutName% shortcut. Setup will continue.
+    call :LOG WARN "Could not create %shortcutName% shortcut."
+    call :RESULT SKIP
+) else (
+    call :RESULT OK
+)
+exit /b 0
 
 :AFTER_SHORTCUT_FUNCTIONS
 
@@ -974,6 +1152,13 @@ if %ver_major% LSS 10 (
     echo [INFO] This script is intended for Windows 10/11 only...
     pause
     exit /b
+for /f %%i in ('powershell -NoProfile -Command "[Environment]::OSVersion.Version.Major"') do set "ver_major=%%i"
+if not defined ver_major (
+    echo [WARN] Unable to determine the Windows version. Setup will continue.
+) else if !ver_major! LSS 10 (
+    echo [INFO] This script is intended for Windows 10/11 only...
+    pause
+    goto MENU
 )
 
 ::=========================================
@@ -1031,6 +1216,7 @@ for /f %%i in ('hostname') do set CurrentName=%%i
 echo.
 echo Current PC Name: %CurrentName%
 echo New PC Name: %NewName%
+echo New PC Name: !NewName!
 
 :: Confirm
 if not defined NewName (
@@ -1039,15 +1225,20 @@ if not defined NewName (
     goto AFTER_MAIN_RENAME
 )
 echo(%NewName%| findstr /r /x "[A-Za-z0-9][A-Za-z0-9-]*" >nul
+echo(!NewName!| findstr /r /x "[A-Za-z0-9][A-Za-z0-9-]*" >nul
 if errorlevel 1 (
     echo [ERROR] PC names may contain only letters, numbers, and hyphens.
     call :RESULT FAIL
     goto AFTER_MAIN_RENAME
 )
+set "confirm="
 set /p confirm=Do you want to rename the PC to "%NewName%" (Y/N): 
 if /i "%confirm%"=="Y" (
+set /p confirm=Do you want to rename the PC to "!NewName!" (Y/N): 
+if /i "!confirm!"=="Y" (
     echo [INFO] Rename command issued. Will require a restart to take effect.
     powershell -NoProfile -Command "Rename-Computer -NewName '%NewName%'"
+    powershell -NoProfile -Command "Rename-Computer -NewName '!NewName!'"
     if errorlevel 1 (
         echo [ERROR] Computer rename failed.
         call :RESULT FAIL
@@ -1058,6 +1249,7 @@ if /i "%confirm%"=="Y" (
     )
 )
 if /i "%confirm%"=="N" (
+if /i "!confirm!"=="N" (
     echo Cancelled by user.
     call :RESULT SKIP
 )
@@ -1066,6 +1258,7 @@ if /i "%confirm%"=="N" (
 ::Make new user an administrator
 
 echo [INFO] Creating new user account...
+echo [INFO] Creating new user account...
 echo [NOTE] Please enter the name of the new user when prompted. You will also be asked if this user should have Administrator privileges. (THIS IS MANDATORY)
 
 set /p "newuser=Enter the user's full name (for example, John Smith): "
@@ -1073,6 +1266,12 @@ if not defined newuser (
     echo [ERROR] A username is required.
     pause
     goto MENU
+set "newuser="
+set /p "newuser=Enter the user's full name, or leave blank to skip: "
+if not defined newuser (
+    echo [SKIP] User creation skipped.
+    call :RESULT SKIP
+    goto AFTER_USER_CREATION
 )
 echo.
 echo [NOTE] Set a password for this user when prompted. Your password will not be displayed.
@@ -1083,6 +1282,12 @@ if errorlevel 1 (
     goto MENU
 )
 set /p usertype=Should this user be an Administrator? (Y/N): 
+    echo [ERROR] The user could not be created. Check the name and try again.
+    call :RESULT FAIL
+    goto AFTER_USER_CREATION
+)
+set "usertype="
+set /p usertype=Should this user be an Administrator? (Y/N): 
 
 if /i "%usertype%"=="Y" (
     net localgroup administrators "%newuser%" /add
@@ -1091,6 +1296,11 @@ if /i "%usertype%"=="Y" (
     echo [OK] Standard user %newuser% created.
 )
 
+
+::=================================================
+)
+
+:AFTER_USER_CREATION
 
 ::=================================================
 :: Open Windows Update Settings, Start Windows Update service
@@ -1149,6 +1359,7 @@ echo:              [5] Create or view Odyssey configuration
 echo:              [6] View current session summary
 echo:              [0] Go to Main Menu
 echo:
+set "deploy_choice="
 set /p "deploy_choice=Enter your choice [0-6]: "
 if "%deploy_choice%"=="1" goto DEPLOYMENT_BACKUP
 if "%deploy_choice%"=="2" goto DEPLOYMENT_RESTORE
@@ -1157,14 +1368,23 @@ if "%deploy_choice%"=="4" goto DEPLOYMENT_CHECKS
 if "%deploy_choice%"=="5" goto DEPLOYMENT_CONFIG
 if "%deploy_choice%"=="6" goto SETUP_SUMMARY
 if "%deploy_choice%"=="0" goto MENU
+if "!deploy_choice!"=="1" goto DEPLOYMENT_BACKUP
+if "!deploy_choice!"=="2" goto DEPLOYMENT_RESTORE
+if "!deploy_choice!"=="3" goto DEPLOYMENT_UPDATES
+if "!deploy_choice!"=="4" goto DEPLOYMENT_CHECKS
+if "!deploy_choice!"=="5" goto DEPLOYMENT_CONFIG
+if "!deploy_choice!"=="6" goto SETUP_SUMMARY
+if "!deploy_choice!"=="0" goto MENU
 echo [ERROR] Invalid choice.
 pause
 goto DEPLOYMENT_TOOLS
 
 :DEPLOYMENT_BACKUP
 echo [NOTE] The Wi-Fi backup contains readable wireless passwords. Store it securely.
+set "confirm="
 set /p "confirm=Continue with the backup? (Y/N): "
 if /i not "%confirm%"=="Y" goto DEPLOYMENT_TOOLS
+if /i not "!confirm!"=="Y" goto DEPLOYMENT_TOOLS
 set "BACKUP_ROOT=%USERPROFILE%\Desktop\Odyssey-Backup-%RUN_ID%"
 mkdir "%BACKUP_ROOT%\WiFi" >nul 2>&1
 mkdir "%BACKUP_ROOT%\Bookmarks" >nul 2>&1
